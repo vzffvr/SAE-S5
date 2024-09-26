@@ -33,7 +33,6 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
 
         installSplashScreen().apply {
-            //Regarde la valeur de isready a chaque fois qu'une frame change sur l'ecran
             //Animation IN
             setKeepOnScreenCondition {
                 !viewModel.isready.value
