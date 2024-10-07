@@ -30,7 +30,6 @@ class MainActivity : ComponentActivity() {
     private lateinit var mqttClientManager: MqttClientManager
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
 
         installSplashScreen().apply {
             //Animation IN
@@ -63,7 +62,8 @@ class MainActivity : ComponentActivity() {
                 zoomY.start()
             }
         }
-
+                
+        super.onCreate(savedInstanceState)
 
         setContent {
 
