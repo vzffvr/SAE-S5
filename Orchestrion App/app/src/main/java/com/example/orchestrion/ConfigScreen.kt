@@ -1,6 +1,5 @@
 package com.example.orchestrion
 
-import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -13,12 +12,21 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonColors
+import androidx.compose.material3.Icon
 import androidx.compose.material3.ShapeDefaults
 import androidx.compose.material3.Switch
+import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -52,10 +60,10 @@ fun ConfigScreen(
 ) {
 
 
-    BackHandler()
-    {
-        //navController?.navigate(MainActivity.PhareScreen)
-    }
+//    BackHandler()
+//    {
+//        //navController?.navigate(MainActivity.PhareScreen)
+//    }
 
     //Background
     Box(
@@ -73,6 +81,10 @@ fun ConfigScreen(
                 .padding(6.dp)
 
         val options = listOf("Sinusoidale", "Carre", "Triangulaire")
+
+        var checked: Boolean by remember {
+            mutableStateOf(true)
+        }
 
         Column(
             modifier = Modifier.fillMaxSize(),
@@ -104,17 +116,31 @@ fun ConfigScreen(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center
             ) {
-                var checked = false
+
                 Switch(
                     modifier = Modifier.semantics { contentDescription = "Demo" },
                     checked = checked,
                     onCheckedChange = {
-
+                        checked = it
                     },
+                    thumbContent = if (checked) {
+                        {
+                            Icon(
+                                imageVector = Icons.Filled.Check,
+                                contentDescription = null,
+                                modifier = Modifier.size(SwitchDefaults.IconSize),
+                            )
+                        }
+                    } else {
+                        null
+                    }
                 )
+
+                Spacer(modifier = Modifier.height(30.dp))
 
                 Spinner(viewmodel, myMQTT, options, "Forme du signal")
 
+                Spacer(modifier = Modifier.height(30.dp))
 
                 Row(
                     modifier = Modifier

@@ -57,6 +57,23 @@ fun MainScreen(
 
     var mqttconnected by remember { mutableStateOf(myMQTT.connected) }
 
+    var buttonColor = ButtonColors(
+        Color.Transparent, Color.Black,
+        Color.Transparent, Color.Black
+    )
+    var TextColor = Color.Black
+
+    var logo = R.drawable.symphonie_branding_light
+
+    if (isSystemInDarkTheme()) {
+        logo = R.drawable.symphonie_branding_dark
+        TextColor = Color.White
+        buttonColor = ButtonColors(
+            Color.Transparent, Color.White,
+            Color.Transparent, Color.White
+        )
+    }
+
     //Background
     Box(
         modifier = Modifier
@@ -87,12 +104,6 @@ fun MainScreen(
                 modifier = Modifier
                     .fillMaxWidth(),
             ) {
-                //Logo
-                var logo = R.drawable.symphonie_branding_light
-                if (isSystemInDarkTheme()) {
-                    logo = R.drawable.symphonie_branding_dark
-                }
-
                 Box(
                     modifier = Modifier
                         .paint(
@@ -115,10 +126,7 @@ fun MainScreen(
                 Button(
                     shape = ShapeDefaults.ExtraLarge,
                     border = BorderStroke(2.dp, Color.White),
-                    colors = ButtonColors(
-                        Color.Transparent, Color.White,
-                        Color.Transparent, Color.White
-                    ),
+                    colors = buttonColor,
                     modifier = buttonModifier,
                     onClick = {
                         navController?.navigate(TestFichier)
@@ -128,7 +136,7 @@ fun MainScreen(
                 ) {
                     Text(
                         text = "Clavier",
-                        color = Color.White,
+                        color = TextColor,
                         fontSize = 20.sp
                     )
                 }
@@ -136,10 +144,7 @@ fun MainScreen(
                 Button(
                     shape = ShapeDefaults.ExtraLarge,
                     border = BorderStroke(2.dp, Color.White),
-                    colors = ButtonColors(
-                        Color.Transparent, Color.White,
-                        Color.Transparent, Color.White
-                    ),
+                    colors = buttonColor,
                     modifier = buttonModifier,
                     onClick = {
                         navController?.navigate(ConfigScreen)
@@ -148,7 +153,7 @@ fun MainScreen(
                     }) {
                     Text(
                         text = "Config",
-                        color = Color.White,
+                        color = TextColor,
                         fontSize = 20.sp
                     )
                 }
