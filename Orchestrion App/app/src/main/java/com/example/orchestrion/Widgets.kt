@@ -18,7 +18,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MenuAnchorType
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -75,7 +74,7 @@ fun Spinner(
     viewModel: ColorViewModel,
     myMQTT: MqttClientManager,
     options: List<String>,
-    titre: String?
+    titre: String?,
 ) {
 
     var expanded by remember { mutableStateOf(false) }
@@ -85,7 +84,7 @@ fun Spinner(
         expanded = expanded,
         onExpandedChange = { expanded = it },
     ) {
-        TextField(
+        OutlinedTextField(
             modifier = Modifier.menuAnchor(MenuAnchorType.PrimaryNotEditable),
             value = text,
             onValueChange = {

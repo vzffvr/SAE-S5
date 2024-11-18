@@ -1,21 +1,15 @@
 package com.example.orchestrion.colorpicker
 
 
-import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonColors
-import androidx.compose.material3.ShapeDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -43,7 +37,10 @@ import com.github.skydoves.colorpicker.compose.ColorEnvelope
 import com.github.skydoves.colorpicker.compose.HsvColorPicker
 import com.github.skydoves.colorpicker.compose.rememberColorPickerController
 
-@Preview
+@Preview(
+    showBackground = true, device = "spec:width=1440px,height=3216px,dpi=440",
+    showSystemUi = false, backgroundColor = 0xFF000000
+)
 @Composable
 fun ColorPickerScreen() {
     val mqttServerUri = "tcp://10.42.0.1:1883"
@@ -60,7 +57,7 @@ fun ColorPicker(
     navController: NavController?,
     viewModel: ColorViewModel
 ) {
-    
+
 //    BackHandler()
 //    {
 //        if (viewModel.getPhare() == 3) {
@@ -96,7 +93,7 @@ fun ColorPicker(
         mutableIntStateOf(viewModel.intensity_ref)
     }
 
-    val options = listOf("Ambiance", "Griffes", "clignotant")
+    val options = listOf("Disabled", "Ambiance", "ColorWipe", "WipeCenter", "WipeEdge")
 
     var hexCode by remember { mutableStateOf(viewModel.hexCode) }
     var textColor by remember { mutableStateOf(viewModel.textColor) }
@@ -137,7 +134,7 @@ fun ColorPicker(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color.Black)
+        //.background(Color.Black)
 //        .paint(
 //        painterResource(id = R.drawable.background),
 //        contentScale = ContentScale.FillHeight)
@@ -153,7 +150,7 @@ fun ColorPicker(
             HsvColorPicker(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(500.dp)
+                    .fillMaxHeight(0.47f)
                     .padding(10.dp),
                 controller = controller,
                 initialColor = Color(255, 255, 255),
@@ -186,11 +183,13 @@ fun ColorPicker(
                 }
             )
 
+            Spacer(modifier = Modifier.fillMaxHeight(0.1f))
+
             AlphaSlider(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(10.dp)
-                    .height(35.dp),
+                    .fillMaxHeight(0.1f),
                 controller = controller,
                 borderRadius = 6.dp,
                 borderSize = 5.dp,
@@ -198,7 +197,8 @@ fun ColorPicker(
             )
 
 
-            Spacer(modifier = Modifier.height(50.dp))
+            Spacer(modifier = Modifier.fillMaxHeight(0.12f))
+
 
 
             Row(
@@ -206,51 +206,53 @@ fun ColorPicker(
             ) {
                 TextPreview(red10, green10, blue10, alpha10, textColor)
 
-                Spacer(modifier = Modifier.width(50.dp))
+                Spacer(modifier = Modifier.fillMaxWidth(0.1f))
 
-                Column(
-                    horizontalAlignment = Alignment.End,
 
-                    )
-                {
-                    Spinner(viewModel, myMQTT, options, "Animation")
-                    //CounterWithButtons(myMQTT,viewModel)
+//                Column(
+//                    horizontalAlignment = Alignment.End,
+//                    )
+//                {
 
-                    Button(
-                        modifier = Modifier
-                            .height(80.dp)
-                            .fillMaxWidth()
-                            .padding(12.dp),
-                        shape = ShapeDefaults.ExtraLarge,
-                        border = BorderStroke(2.dp, Color.White),
-                        colors = ButtonColors(
-                            Color.Transparent, Color.White,
-                            Color.Transparent, Color.White
-                        ),
-                        onClick = {
-                            myMQTT.publish("phare", "3")
 
-                            myMQTT.publish("animation", "1")
+                Spinner(viewModel, myMQTT, options, "Animation")
 
-                            myMQTT.publish("red", "0")
-                            myMQTT.publish("blue", "0")
-                            myMQTT.publish("green", "0")
 
-                        }
-                    ) {
-                        Text(
-                            text = "ShutDown",
-                            color = Color.White,
-                            fontSize = 20.sp
-                        )
-
-                    }
-                }
+//                    Button(
+//                        modifier = Modifier
+//                            .height(80.dp)
+//                            .fillMaxWidth()
+//                            .padding(12.dp),
+//                        shape = ShapeDefaults.ExtraLarge,
+//                        border = BorderStroke(2.dp, Color.White),
+//                        colors = ButtonColors(
+//                            Color.Transparent, Color.White,
+//                            Color.Transparent, Color.White
+//                        ),
+//                        onClick = {
+//                            myMQTT.publish("phare", "3")
+//
+//                            myMQTT.publish("animation", "1")
+//
+//                            myMQTT.publish("red", "0")
+//                            myMQTT.publish("blue", "0")
+//                            myMQTT.publish("green", "0")
+//
+//                        }
+//                    ) {
+//                        Text(
+//                            text = "ShutDown",
+//                            color = Color.White,
+//                            fontSize = 20.sp
+//                        )
+//
+//                    }
+//                }
 
 
             }
 
-            Spacer(modifier = Modifier.height(25.dp))
+            Spacer(modifier = Modifier.fillMaxHeight(0.03f))
 
             Text(
                 text = "#$hexCode",
@@ -263,7 +265,7 @@ fun ColorPicker(
             AlphaTile(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(30.dp),
+                    .fillMaxHeight(0.15f),
                 controller = controller,
                 tileOddColor = Color.White,
                 tileEvenColor = Color.LightGray,

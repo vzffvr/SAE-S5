@@ -20,13 +20,17 @@
             android:exported="true"
             android:theme="@style/Theme.App.Starting">
 
-
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
 
         </activity>
+
+        <activity
+            android:name="com.example.orchestrion.PianoActivity"
+            android:exported="true"
+            android:theme="@style/Theme.Piano" />
 
 
         <service android:name="org.eclipse.paho.android.service.MqttService" />

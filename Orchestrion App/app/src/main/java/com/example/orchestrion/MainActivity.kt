@@ -9,11 +9,11 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.compose.ui.platform.LocalContext
+import androidx.core.animation.doOnEnd
+import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import androidx.core.animation.doOnEnd
-import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import com.example.orchestrion.colorpicker.ColorPicker
 import com.example.orchestrion.colorpicker.ColorViewModel
 import com.example.orchestrion.theme.DefaultTheme
@@ -32,11 +32,11 @@ class MainActivity : ComponentActivity() {
         installSplashScreen().apply {
             //Regarde la valeur de isready a chaque fois qu'une frame change sur l'ecran
             //Animation IN
-            setKeepOnScreenCondition{
+            setKeepOnScreenCondition {
                 !viewModel.isready.value
             }
             //Animation OUT
-            setOnExitAnimationListener{screen ->
+            setOnExitAnimationListener { screen ->
                 val zoomX = ObjectAnimator.ofFloat(
                     screen.iconView,
                     View.SCALE_X,
@@ -77,24 +77,26 @@ class MainActivity : ComponentActivity() {
 
                 val context = LocalContext.current
                 val mqttServerUri = "tcp://10.42.0.1:1883"
-                val mqttClientManager : MqttClientManager = MqttClientManager(mqttServerUri, context)
+                val mqttClientManager: MqttClientManager = MqttClientManager(mqttServerUri, context)
 
                 NavHost(
                     navController = navController,
-                    startDestination = PhareScreen)
+                    startDestination = PhareScreen
+                )
                 {
-                    composable<PhareScreen>{
+                    composable<PhareScreen> {
                         MainScreen(
                             viewmodel = colorViewModel,
                             navController = navController,
                             myMQTT = mqttClientManager
-                            )
+                        )
                     }
                     composable<Colorpicker> {
                         ColorPicker(
                             viewModel = colorViewModel,
                             navController = navController,
-                            myMQTT = mqttClientManager)
+                            myMQTT = mqttClientManager
+                        )
                     }
 //                    composable<ImgColorPicker> {
 //                        ImgColorPicker(
@@ -105,8 +107,8 @@ class MainActivity : ComponentActivity() {
 //                    }
                     composable<ConfigScreen> {
                         ConfigScreen(
-                            viewmodel= colorViewModel,
-                            navController= navController,
+                            viewmodel = colorViewModel,
+                            navController = navController,
                             myMQTT = mqttClientManager
                         )
                     }
@@ -134,6 +136,7 @@ object ImgColorPicker
 
 @Serializable
 object TestFichier
+
 
 
 
