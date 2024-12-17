@@ -1,11 +1,10 @@
 #include <Arduino.h>
 
 #define PERIODE 1000
-#define PERIODE_SCAN 300
+#define PERIODE_SCAN 30
 
-
-uint8_t rows[3] = {12,11, 10};
-uint8_t cols[3] = {7,8,9};
+uint8_t rows[3] = {9,10, 11};
+uint8_t cols[3] = {7,8,1};
 bool cols_scan = false;
 int cpt = 0;
 uint8_t btn = 00;
@@ -37,108 +36,48 @@ void setup()
 
 void loop()
 {
-  if ( (maintenant_debug + PERIODE) < millis())
+  if ((maintenant_scan + PERIODE_SCAN) < millis())
   {
-    digitalWrite(rows[0], HIGH);
-    digitalWrite(rows[1], LOW);
-    digitalWrite(rows[2], LOW);
-    if (digitalRead(cols[0]) == LOW)
-    {
-      col_select = 0;
-      row_select = 0;
-    }  
-    if (digitalRead(cols[1]) == LOW)
-    {
-      col_select = 1;
-      row_select = 0;
-    }  
-    if (digitalRead(cols[2]) == LOW)
-    {
-      col_select = 2;
-      row_select = 0;
-    }
+    maintenant_scan = millis();
 
-    digitalWrite(rows[0], LOW);
-    digitalWrite(rows[1], HIGH);
-    digitalWrite(rows[2], LOW);
-    if (digitalRead(cols[0]) == LOW)
+    for (int num_ligne = 0; num_ligne < 3; num_ligne++)
     {
-      col_select = 0;
-      row_select = 1;
-    }  
-    if (digitalRead(cols[1]) == LOW)
-    {
-      col_select = 1;
-      row_select = 1;
-    }  
-    if (digitalRead(cols[2]) == LOW)
-    {
-      col_select = 2;
-      row_select = 1;
-    }
+      // Réinitialisation des lignes
+      for (int i = 0; i < 3; i++)
+      {
+        digitalWrite(rows[i], LOW);
+      }
+      digitalWrite(rows[num_ligne], HIGH);
 
-    digitalWrite(rows[0], LOW);
-    digitalWrite(rows[1], LOW);
-    digitalWrite(rows[2], HIGH);
-    if (digitalRead(cols[0]) == LOW)
-    {
-      col_select = 0;
-      row_select = 2;
-    }  
-    if (digitalRead(cols[1]) == LOW)
-    {
-      col_select = 1;
-      row_select = 2;
-    }  
-    if (digitalRead(cols[2]) == LOW)
-    {
-      col_select = 2;
-      row_select = 2;
-    }
+      delay(5); // Stabilisation des lignes
 
-    toucherBouton(col_select, row_select);
+      for (int num_col = 0; num_col < 2; num_col++)
+      {
+        cols_scan = digitalRead(cols[num_col]);
+        if (cols_scan == LOW)
+        {
+          delay(10); // Anti-rebond
+          if (digitalRead(cols[num_col]) == LOW)
+          { // Vérification stable
+            col_select = num_col;
+            row_select = num_ligne;
+          }
+        }
+      }
+    }
   }
-  
 
-    
+  // Traitement du bouton détecté
+  toucherBouton(col_select, row_select);
 
-
-
-
-  // for (int num_ligne = 0; num_ligne < 3; num_ligne++)
-  // {
-  //   digitalWrite(rows[0], LOW);
-  //   digitalWrite(rows[1], LOW);
-  //   digitalWrite(rows[2], LOW);
-  //   digitalWrite(rows[num_ligne], HIGH);
-
-  //   for (int num_col = 0; num_col < 3; num_col++)
-  //   {
-  //     cols_scan = digitalRead(cols[num_col]);
-  //     if (cols_scan == LOW)
-  //     {
-
-  //       col_select = num_col;
-  //       row_select = num_ligne;
-
-  //     }  
-  //   }
-  // }  
-
-  
-
-  if( (maintenant_debug + PERIODE) < millis())
+  // Affichage pour le débogage
+  if ((maintenant_debug + PERIODE) < millis())
   {
     maintenant_debug = millis();
-    Serial.print(col_select);
-    Serial.print("   ");
-    Serial.println(row_select);
+    Serial.printf("bouton %d,\t colonne: %d,\t ligne : %d\n", btn, col_select, row_select);
   }
 
-  
   last_btn = btn;
-
-
 
   // if((btn==last_btn) && (btn =! 99))
   // {
@@ -158,8 +97,6 @@ void loop()
   // }
   // last_btn = btn;
 }
-
-  
 
 void toucherBouton(uint8_t num_col, uint8_t num_ligne)
 {
@@ -183,6 +120,4 @@ void toucherBouton(uint8_t num_col, uint8_t num_ligne)
     btn = btn_tab[7];
   if (num_col == 2 && num_ligne == 2) // Bouton S4 enfoncé
     btn = btn_tab[8]; 
-
-  
 }
