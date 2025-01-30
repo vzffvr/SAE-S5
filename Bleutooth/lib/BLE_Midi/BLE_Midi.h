@@ -10,13 +10,8 @@
 #define SERVICE_UUID "12345678-1234-5678-1234-56789abcdef0"        // UUID du service
 #define CHARACTERISTIC_UUID "abcdef01-1234-5678-1234-56789abcdef0" // UUID de la caractéristique
 
-#define CHAR_UUID_NOTE "abcdef01-1234-5678-1234-56789abcdef0"
-#define CHAR_UUID_VOLUME "abcdef02-1234-5678-1234-56789abcdef0"
-#define CHAR_UUID_MIDI "abcdef03-1234-5678-1234-56789abcdef0"
 
-BLECharacteristic *noteCharacteristic;
-BLECharacteristic *midiCharacteristic;
-BLECharacteristic *volumeCharacteristic;
+
 
 class BLE_Midi
 {

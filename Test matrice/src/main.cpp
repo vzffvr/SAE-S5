@@ -1,123 +1,99 @@
 #include <Arduino.h>
+#include <main.h>
+#include <Tone32.h>
 
-#define PERIODE 1000
-#define PERIODE_SCAN 30
+#define BUZZER_PIN 25 // Broche pour le buzzer
+#define BUZZER_CHANNEL 0
 
-uint8_t rows[3] = {9,10, 11};
-uint8_t cols[3] = {7,8,1};
-bool cols_scan = false;
-int cpt = 0;
-uint8_t btn = 00;
-uint8_t last_btn = 00;
-uint8_t btn_tab[25] = {00,01,02,10,11,12,20,21,22,99};
-
-uint8_t col_select = 0;
-uint8_t row_select = 0;
-
-uint32_t maintenant_debug  = 0;
-uint32_t maintenant_scan  = 0;
-
-
-
-void toucherBouton(uint8_t num_ligne, uint8_t num_col);
-void scan();
 
 void setup()
 {
   Serial.begin(115200);
+
+  //Boutons
   for (int i = 0; i < 3; i++)
   {
     pinMode(rows[i], OUTPUT);
-    pinMode(cols[i], INPUT);
+    digitalWrite(rows[i], LOW); // Initialise les lignes à LOW
+    pinMode(cols[i], INPUT_PULLUP); // Active les résistances internes PULLUP
   }
   maintenant_debug = millis();
   maintenant_scan = millis();
+  
+  //Neopixel
+  strip.begin();
+  strip.setBrightness(200);
+  strip.show();
+  tone32_begin(TONE_PIN);  
 }
 
 void loop()
 {
-  if ((maintenant_scan + PERIODE_SCAN) < millis())
+
+  for(int i = 0; i<10; i++)
+  {
+    strip.setPixelColor(i,strip.Color(0,100,0));
+    strip.show();
+    Serial.println(strip.getBrightness());
+  }
+  scan();
+  debug();
+}
+
+
+
+void scan(){
+  if (millis() - maintenant_scan >  PERIODE_SCAN)
   {
     maintenant_scan = millis();
+    col_select = 9;
+    row_select = 9;
 
-    for (int num_ligne = 0; num_ligne < 3; num_ligne++)
+    
+    // Réinitialisation des lignes
+    for (int i = 0; i < 3; i++)
     {
-      // Réinitialisation des lignes
-      for (int i = 0; i < 3; i++)
-      {
-        digitalWrite(rows[i], LOW);
-      }
-      digitalWrite(rows[num_ligne], HIGH);
+      digitalWrite(rows[i], LOW);// Désactive toutes les lignes
+    }
+    digitalWrite(rows[ligne_actuelle], HIGH);
+    delay(5);
 
-      delay(5); // Stabilisation des lignes
-
-      for (int num_col = 0; num_col < 2; num_col++)
+    for (int num_col = 0; num_col < 3; num_col++)
+    {
+      if (digitalRead(cols[num_col]) == LOW) // Détection état bas
       {
-        cols_scan = digitalRead(cols[num_col]);
-        if (cols_scan == LOW)
+        delay(10); // Anti-rebond court
+        if (digitalRead(cols[num_col]) == LOW) // Vérification stable
         {
-          delay(10); // Anti-rebond
-          if (digitalRead(cols[num_col]) == LOW)
-          { // Vérification stable
-            col_select = num_col;
-            row_select = num_ligne;
-          }
+          col_select = num_col;
+          row_select = ligne_actuelle;
         }
       }
     }
+    ligne_actuelle = (ligne_actuelle+1)%3;
   }
-
-  // Traitement du bouton détecté
-  toucherBouton(col_select, row_select);
-
-  // Affichage pour le débogage
-  if ((maintenant_debug + PERIODE) < millis())
-  {
-    maintenant_debug = millis();
-    Serial.printf("bouton %d,\t colonne: %d,\t ligne : %d\n", btn, col_select, row_select);
-  }
-
-  last_btn = btn;
-
-  // if((btn==last_btn) && (btn =! 99))
-  // {
-  //   cpt++;
-  // }
-  // else
-  // {
-  //   cpt=0;
-  // }
-  // if(cpt >= 10)
-  // {
-  //   Serial.println(btn);
-  //   Serial.print("cpt = ");
-  //   Serial.println(cpt);
-  //   // Serial.print(num_col);
-  //   // Serial.println(num_ligne);
-  // }
-  // last_btn = btn;
+  toucherBouton(row_select, col_select); 
 }
 
-void toucherBouton(uint8_t num_col, uint8_t num_ligne)
+void debug(){
+    // Affichage pour le débogage
+  if ((maintenant_debug + PERIODE_DEBUG) < millis())
+  {
+    maintenant_debug = millis();
+    Serial.printf("Bouton : %d,\t Colonne : %d,\t Ligne : %d\n", btn, col_select, row_select);
+  }
+}
+
+void toucherBouton(uint8_t num_ligne, uint8_t num_col)
 {
-  if (num_col == 0 && num_ligne == 0) // Bouton S1 enfoncé
-    btn = btn_tab[0];
-  if (num_col == 0 && num_ligne == 1) // Bouton S2 enfoncé
-    btn = btn_tab[1];
-  if (num_col == 0 && num_ligne == 2) // Bouton S2 enfoncé
-    btn = btn_tab[2];
-
-  if (num_col == 1 && num_ligne == 0) // Bouton S3 enfoncé
-    btn = btn_tab[3];
-  if (num_col == 1 && num_ligne == 1) // Bouton S4 enfoncé
-    btn = btn_tab[4];
-  if (num_col == 1 && num_ligne == 2) // Bouton S4 enfoncé
-    btn = btn_tab[5];
-
-  if (num_col == 2 && num_ligne == 0) // Bouton S4 enfoncé
-    btn = btn_tab[6];   
-  if (num_col == 2 && num_ligne == 1) // Bouton S4 enfoncé
-    btn = btn_tab[7];
-  if (num_col == 2 && num_ligne == 2) // Bouton S4 enfoncé
-    btn = btn_tab[8]; 
+  if (num_col == 0 && num_ligne == 0) btn = btn_tab[0];
+  else if (num_col == 0 && num_ligne == 1) btn = btn_tab[1];
+  else if (num_col == 0 && num_ligne == 2) btn = btn_tab[2];
+  else if (num_col == 1 && num_ligne == 0) btn = btn_tab[3];
+  else if (num_col == 1 && num_ligne == 1) btn = btn_tab[4];
+  else if (num_col == 1 && num_ligne == 2) btn = btn_tab[5];
+  else if (num_col == 2 && num_ligne == 0) btn = btn_tab[6];
+  else if (num_col == 2 && num_ligne == 1) btn = btn_tab[7];
+  else if (num_col == 2 && num_ligne == 2) btn = btn_tab[8];
+  else btn = btn_tab[9]; // Aucune touche détectée
 }

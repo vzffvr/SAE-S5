@@ -11,25 +11,21 @@ void BLE_Midi::initBLE()
 {
     // Initialiser le périphérique BLE
     BLEDevice::init("ESP32 BLE Instrument");
+
     BLEServer *pServer = BLEDevice::createServer();
+
 
     // Créer un service
     BLEService *pService = pServer->createService(SERVICE_UUID);
 
-    noteCharacteristic = pService->createCharacteristic(
-        CHAR_UUID_NOTE,
-        BLECharacteristic::PROPERTY_WRITE);
-    noteCharacteristic->setValue(&currentNote, 1);
-
-    volumeCharacteristic = pService->createCharacteristic(
-        CHAR_UUID_NOTE,
-        BLECharacteristic::PROPERTY_WRITE);
-    volumeCharacteristic->setValue(&volume, 1);
-
+    // Créer la caractéristique MIDI
+    BLECharacteristic *midiCharacteristic;
     midiCharacteristic = pService->createCharacteristic(
         CHARACTERISTIC_UUID,
         BLECharacteristic::PROPERTY_READ |
-            BLECharacteristic::PROPERTY_WRITE);
+        BLECharacteristic::PROPERTY_WRITE |
+        BLECharacteristic::PROPERTY_NOTIFY
+    );
 
     // Définir la valeur initiale de la caractéristique comme une chaîne vide
     midiCharacteristic->setValue(midi_message.c_str());

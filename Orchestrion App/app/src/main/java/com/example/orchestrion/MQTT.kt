@@ -1,8 +1,6 @@
 package com.example.orchestrion
 
 import android.content.Context
-import android.widget.Toast
-import androidx.compose.runtime.remember
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -21,14 +19,15 @@ class MqttClientManager(
     private val serverUri: String,
     context: Context
 ) {
-    private var mqttClient: MqttClient = MqttClient(serverUri, MqttClient.generateClientId(), MemoryPersistence())
+    private var mqttClient: MqttClient =
+        MqttClient(serverUri, MqttClient.generateClientId(), MemoryPersistence())
     var connected = false
 
     init {
         reconnectToMqttBroker(context)
     }
 
-     private fun connect() {
+    private fun connect() {
         try {
             mqttClient = MqttClient(serverUri, MqttClient.generateClientId(), MemoryPersistence())
             val options = MqttConnectOptions()
@@ -66,14 +65,14 @@ class MqttClientManager(
 
 
     fun publish(topic: String, message: String) {
-            try {
-                val mqttTopic: MqttTopic = mqttClient.getTopic(topic)
-                val mqttMessage = MqttMessage(message.toByteArray())
-                mqttTopic.publish(mqttMessage)
-            } catch (e: MqttException) {
-                e.printStackTrace()
-                connected = mqttClient.isConnected
-            }
+        try {
+            val mqttTopic: MqttTopic = mqttClient.getTopic(topic)
+            val mqttMessage = MqttMessage(message.toByteArray())
+            mqttTopic.publish(mqttMessage)
+        } catch (e: MqttException) {
+            e.printStackTrace()
+            connected = mqttClient.isConnected
+        }
 
     }
 
@@ -81,7 +80,7 @@ class MqttClientManager(
     fun reconnectToMqttBroker(context: Context) {
         CoroutineScope(Dispatchers.Main).launch {
             if (mqttClient.isConnected) {
-                Toast.makeText(context, "Already connected to MQTT broker", Toast.LENGTH_SHORT).show()
+//                Toast.makeText(context, "Already connected to MQTT broker", Toast.LENGTH_SHORT).show()
                 return@launch
             }
 
@@ -94,18 +93,17 @@ class MqttClientManager(
                 withContext(Dispatchers.IO) { // Perform connection on a background thread
                     mqttClient.connect()
                 }
-                Toast.makeText(context, "Connected to MQTT broker${mqttClient.isConnected}", Toast.LENGTH_SHORT).show()
+//                Toast.makeText(context, "Connected to MQTT broker", Toast.LENGTH_SHORT).show()
                 // Perform actions after successful reconnection
             } catch (e: MqttException) {
-                Toast.makeText(context, "Not Connected to MQTT broker /*${mqttClient.isConnected}*/", Toast.LENGTH_SHORT).show()
+//                Toast.makeText(context, "Not Connected to MQTT broker", Toast.LENGTH_SHORT).show()
                 // Handle reconnection failure
             }
             connected = mqttClient.isConnected
         }
     }
 
-    fun isConnected() : Boolean
-    {
+    fun isConnected(): Boolean {
         return mqttClient.isConnected
     }
 
