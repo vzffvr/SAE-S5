@@ -1,5 +1,6 @@
 package com.example.orchestrion
 
+import BleManager
 import android.content.Intent
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.isSystemInDarkTheme
@@ -19,6 +20,7 @@ import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.ShapeDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.paint
@@ -32,8 +34,8 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.orchestrion.colorpicker.ColorViewModel
-import java.util.Timer
-import java.util.TimerTask
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
 
 @Preview
 @Composable
@@ -44,7 +46,7 @@ fun MainScreenPreview() {
     MainScreen(
         navController = null,
         viewmodel = viewModel,
-        myMQTT = MqttClientManager("tcp://10.42.0.1:1883", LocalContext.current)
+        BLeManager = null
     )
 }
 
@@ -52,23 +54,9 @@ fun MainScreenPreview() {
 fun MainScreen(
     navController: NavController?,
     viewmodel: ColorViewModel,
-    myMQTT: MqttClientManager
+    BLeManager: BleManager?
 ) {
 
-    var connectedcolor = Color.Red
-
-    val timer = Timer()
-    timer.schedule(object : TimerTask() {
-        override fun run() {
-            println("Timer ticked!")
-            if (myMQTT.isConnected()) {
-                connectedcolor = Color.Green
-            } else {
-                connectedcolor = Color.Red
-            }
-
-        }
-    }, 0, 1000)
 
     var buttonColor = ButtonColors(
         Color.Transparent, Color.Black,
@@ -86,6 +74,15 @@ fun MainScreen(
             Color.Transparent, Color.White
         )
         buttonborder = BorderStroke(2.dp, Color.White)
+    }
+
+    
+    LaunchedEffect(pulseRateMs) { // Restart the effect when the pulse rate changes
+        while (isActive) {
+            delay(pulseRateMs) // Pulse the alpha every pulseRateMs to alert the user
+            alpha.animateTo(0f)
+            alpha.animateTo(1f)
+        }
     }
 
     //Background

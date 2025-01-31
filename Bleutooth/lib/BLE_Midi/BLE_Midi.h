@@ -7,8 +7,8 @@
 #include <BLEServer.h>
 
 // Identifiants pour le service et la caractéristique
-#define SERVICE_UUID "12345678-1234-5678-1234-56789abcdef0"        // UUID du service
-#define CHARACTERISTIC_UUID "abcdef01-1234-5678-1234-56789abcdef0" // UUID de la caractéristique
+#define SERVICE_UUID "03B80E5A-EDE8-4B33-A751-6CE34EC4C700"      // UUID du service
+#define CHARACTERISTIC_UUID "7772E5DB-3868-4112-A1A9-F2669D106BF3" // UUID de la caractéristique
 
 
 

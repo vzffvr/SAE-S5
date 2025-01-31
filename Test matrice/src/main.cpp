@@ -1,21 +1,40 @@
 #include <Arduino.h>
 #include <main.h>
-#include <Tone32.h>
+#include <Keypad.h>
 
 #define BUZZER_PIN 25 // Broche pour le buzzer
 #define BUZZER_CHANNEL 0
+
+#define  ROWS  3 // 5 lignes
+#define  COLS  3 // 5 colonnes
+
+// Broches compatibles ESP32
+byte rowPins[ROWS] = {D13, A0, A1}; // Lignes
+byte colPins[COLS] = {D12, D11, D10};  // Colonnes
+
+char keys[ROWS][COLS] = {
+  {'1', '2', '3'},
+  {'6', '7', '8'},
+  {'B', 'C', 'D'}
+};
+
+Keypad keypad = Keypad(makeKeymap(keys), rowPins, colPins, ROWS, COLS);
 
 
 void setup()
 {
   Serial.begin(115200);
 
-  //Boutons
-  for (int i = 0; i < 3; i++)
-  {
-    pinMode(rows[i], OUTPUT);
-    digitalWrite(rows[i], LOW); // Initialise les lignes à LOW
-    pinMode(cols[i], INPUT_PULLUP); // Active les résistances internes PULLUP
+  // //Boutons
+  // for (int i = 0; i < 3; i++)
+  // {
+  //   pinMode(rows[i], OUTPUT);
+  //   digitalWrite(rows[i], LOW); // Initialise les lignes à LOW
+  //   pinMode(cols[i], INPUT_PULLUP); // Active les résistances internes PULLUP
+  // }
+
+  for (int i = 0; i < COLS; i++) {
+    pinMode(colPins[i], INPUT_PULLUP);
   }
   maintenant_debug = millis();
   maintenant_scan = millis();
@@ -24,20 +43,27 @@ void setup()
   strip.begin();
   strip.setBrightness(200);
   strip.show();
-  tone32_begin(TONE_PIN);  
+  //tone32_begin(TONE_PIN);  
 }
 
 void loop()
 {
 
-  for(int i = 0; i<10; i++)
-  {
-    strip.setPixelColor(i,strip.Color(0,100,0));
-    strip.show();
-    Serial.println(strip.getBrightness());
-  }
-  scan();
-  debug();
+  char key = keypad.getKey();
+
+    if (key) { // Si une touche est détectée
+        Serial.print("Touche pressée : ");
+        Serial.println(key);
+    }
+
+  // for(int i = 0; i<10; i++)
+  // {
+  //   strip.setPixelColor(i,strip.Color(0,100,0));
+  //   strip.show();
+  //   Serial.println(strip.getBrightness());
+  // }
+  // scan();
+  // debug();
 }
 
 

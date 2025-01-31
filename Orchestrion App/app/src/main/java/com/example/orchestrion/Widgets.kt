@@ -165,7 +165,7 @@ fun NumberTextField(myMQTT: MqttClientManager, viewModel: ColorViewModel) {
 
 
 @Composable
-fun CounterWithButtons(myMQTT: MqttClientManager, viewModel: ColorViewModel) {
+fun CounterWithButtons(myMQTT: MqttClientManager?, viewModel: ColorViewModel) {
 
     Spacer(modifier = Modifier.height(10.dp))
 
@@ -189,7 +189,7 @@ fun CounterWithButtons(myMQTT: MqttClientManager, viewModel: ColorViewModel) {
                     if (intensity_ref > 0) {
                         intensity_ref--
                         viewModel.intensity_ref = intensity_ref
-                        myMQTT.publish("intensite_ref", "$intensity_ref")
+                        myMQTT?.publish("intensite_ref", "$intensity_ref")
                     }
                 }
             ) {
@@ -207,7 +207,7 @@ fun CounterWithButtons(myMQTT: MqttClientManager, viewModel: ColorViewModel) {
                     if (intensity_ref < 255) {
                         intensity_ref++
                         viewModel.intensity_ref = intensity_ref
-                        myMQTT.publish("intensite_ref", "$intensity_ref")
+                        myMQTT?.publish("intensite_ref", "$intensity_ref")
                     }
                 }
             ) {

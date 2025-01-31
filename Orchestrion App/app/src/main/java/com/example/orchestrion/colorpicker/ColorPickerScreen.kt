@@ -1,6 +1,7 @@
 package com.example.orchestrion.colorpicker
 
 
+import BleManager
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -21,14 +22,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import com.example.orchestrion.MqttClientManager
 import com.example.orchestrion.Spinner
 import com.example.orchestrion.TextPreview
 import com.github.skydoves.colorpicker.compose.AlphaSlider
@@ -43,18 +42,16 @@ import com.github.skydoves.colorpicker.compose.rememberColorPickerController
 )
 @Composable
 fun ColorPickerScreen() {
-    val mqttServerUri = "tcp://10.42.0.1:1883"
-    val myMQTT: MqttClientManager = MqttClientManager(mqttServerUri, LocalContext.current)
 
     val viewModel: ColorViewModel = viewModel()
 
-    ColorPicker(myMQTT = myMQTT, viewModel = viewModel, navController = null)
+    ColorPicker(viewModel = viewModel, navController = null, BLeManager = null)
 }
 
 @Composable
 fun ColorPicker(
-    myMQTT: MqttClientManager,
-    navController: NavController?,
+    BLeManager: BleManager?,
+    navController: NavController?, //PhotoPicker
     viewModel: ColorViewModel
 ) {
 

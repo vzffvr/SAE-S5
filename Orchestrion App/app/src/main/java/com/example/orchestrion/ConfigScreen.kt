@@ -1,5 +1,6 @@
 package com.example.orchestrion
 
+import BleManager
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -48,7 +49,7 @@ fun ConfigScreenPreview() {
     ConfigScreen(
         navController = null,
         viewmodel = viewModel,
-        myMQTT = MqttClientManager("tcp://10.42.0.1:1883", LocalContext.current)
+        BLeManager = null
     )
 }
 
@@ -56,7 +57,7 @@ fun ConfigScreenPreview() {
 fun ConfigScreen(
     navController: NavController?,
     viewmodel: ColorViewModel,
-    myMQTT: MqttClientManager
+    BLeManager: BleManager?
 ) {
 
 
