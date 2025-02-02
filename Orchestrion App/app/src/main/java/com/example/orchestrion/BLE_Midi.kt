@@ -1,3 +1,5 @@
+package com.example.orchestrion
+
 import android.Manifest
 import android.annotation.SuppressLint
 import android.app.Activity
@@ -24,11 +26,15 @@ class BleManager(private val context: Context) {
     val requiredPermissions = arrayOf(
         Manifest.permission.BLUETOOTH,
         Manifest.permission.BLUETOOTH_ADMIN,
-        Manifest.permission.ACCESS_FINE_LOCATION
+        Manifest.permission.ACCESS_FINE_LOCATION,
+        Manifest.permission.BLUETOOTH_SCAN,
+        Manifest.permission.BLUETOOTH_CONNECT,
+        Manifest.permission.BLUETOOTH_ADVERTISE
     )
 
     private var bluetoothGatt: BluetoothGatt? = null
-    private var writeCharacteristic: BluetoothGattCharacteristic? = null
+    private var midiWriteCharacteristic: BluetoothGattCharacteristic? = null
+    private var colorWriteCharacteristic: BluetoothGattCharacteristic? = null
     private var scanning = false
     private val handler = Handler()
     private val SCAN_PERIOD: Long = 10000 // 10 secondes
@@ -45,14 +51,12 @@ class BleManager(private val context: Context) {
         bluetoothAdapter?.bluetoothLeScanner
     }
 
-    // Vérifier si les permissions sont accordées
     fun hasPermissions(): Boolean {
         return requiredPermissions.all {
             ContextCompat.checkSelfPermission(context, it) == PackageManager.PERMISSION_GRANTED
         }
     }
 
-    // Demander les permissions si elles ne sont pas accordées
     fun requestPermissions(activity: Activity) {
         if (!hasPermissions()) {
             ActivityCompat.requestPermissions(activity, requiredPermissions, 1)
@@ -77,15 +81,9 @@ class BleManager(private val context: Context) {
             val device = result.device
 
             if (device.name != null && device.name == "ESP32 BLE Instrument") {
-                Toast.makeText(
-                    context,
-                    "Device found: ${device.name}",
-                    Toast.LENGTH_SHORT
-                ).show()
-
-                Log.d("BLE_SCAN", "Device found: ${device.name} - ${device.address}")
+                //Log.d("BLE_SCAN", "Device found: ${device.name} - ${device.address}")
                 stopScan()
-
+                Toast.makeText(context, "Connexion réussie", Toast.LENGTH_SHORT).show()
                 device.connectGatt(context, false, gattCallback)
             }
         }
@@ -99,7 +97,7 @@ class BleManager(private val context: Context) {
                 bluetoothGatt = gatt
                 gatt.discoverServices()
             } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
-                Log.d("BLE", "Déconnecté")
+                Log.e("BLE", "Déconnecté")
                 bluetoothGatt?.close()
                 bluetoothGatt = null
             }
@@ -107,17 +105,26 @@ class BleManager(private val context: Context) {
 
         override fun onServicesDiscovered(gatt: BluetoothGatt, status: Int) {
             if (status == BluetoothGatt.GATT_SUCCESS) {
+
                 Log.d("BLE", "Services découverts")
                 val serviceUUID = UUID.fromString("03B80E5A-EDE8-4B33-A751-6CE34EC4C700")
-                val characteristicUUID = UUID.fromString("7772E5DB-3868-4112-A1A9-F2669D106BF3")
+                val midiCharacteristicUUID = UUID.fromString("7772E5DB-3868-4112-A1A9-F2669D106BF3")
+                val colorCharacteristicUUID = UUID.fromString("12345678-1234-5678-1234-56789ABCDEF0")
 
                 val service = gatt.getService(serviceUUID)
-                writeCharacteristic = service?.getCharacteristic(characteristicUUID)
+                midiWriteCharacteristic = service?.getCharacteristic(midiCharacteristicUUID)
+                colorWriteCharacteristic = service?.getCharacteristic(colorCharacteristicUUID)
 
-                if (writeCharacteristic != null) {
-                    Log.d("BLE", "Caractéristique trouvée, prête à écrire")
+                if (midiWriteCharacteristic != null) {
+                    Log.d("BLE", "Caractéristique midi trouvée, prête à écrire")
                 } else {
-                    Log.e("BLE", "Caractéristique non trouvée")
+                    Log.e("BLE", "Caractéristique midi non trouvée")
+                }
+
+                if (colorWriteCharacteristic != null) {
+                    Log.d("BLE", "Caractéristique couleur trouvée, prête à écrire")
+                } else {
+                    Log.e("BLE", "Caractéristique couleur non trouvée")
                 }
             }
         }
@@ -125,8 +132,23 @@ class BleManager(private val context: Context) {
 
     @SuppressLint("MissingPermission")
     fun isOrchestrionConnected(): Boolean {
-        return !bluetoothGatt?.device?.name.equals("ESP32 BLE Instrument")
+        return bluetoothGatt?.device?.name.equals("ESP32 BLE Instrument")
+    }
 
+    fun reconnectToESP32(){
+        if (!isBluetoothEnabled()) {
+            Toast.makeText(context, "Bluetooth non activé", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+
+        if (isOrchestrionConnected()) {
+            Toast.makeText(context, "Déjà connecté", Toast.LENGTH_SHORT).show()
+        }else{
+            Toast.makeText(context, "Tentative de Reconnexion", Toast.LENGTH_SHORT).show()
+            stopScan()
+            startScan()
+        }
     }
 
     @SuppressLint("MissingPermission")
@@ -158,15 +180,33 @@ class BleManager(private val context: Context) {
             Log.e("BLE", "Canal MIDI invalide. Doit être entre 1 et 16.")
             return
         }
-
-        val statusByte = (0x90 + (channel - 1)).toByte()
-        val noteByte = note.toByte()
-        val velocityByte = velocity.toByte()
+        val statusByte = (0x90 + (channel - 1)).toByte() //Channel
+        val noteByte = note.toByte() //Note
+        val velocityByte = velocity.toByte() //Velocity
 
         val midiPacket = byteArrayOf(0x80.toByte(), statusByte, noteByte, velocityByte)
+        midiWriteCharacteristic?.value = midiPacket
 
-        writeCharacteristic?.value = midiPacket
-        bluetoothGatt?.writeCharacteristic(writeCharacteristic)
-        Log.d("BLE", "Message MIDI envoyé: Canal=$channel, Note=$note, Velocity=$velocity")
+        bluetoothGatt?.writeCharacteristic(midiWriteCharacteristic)
+
+        Log.d("BLE", "Message envoyé: $channel,\t $note, \t $velocity")
+
     }
+
+    @SuppressLint("MissingPermission")
+    fun sendColorOrder(red: Int, green: Int, blue: Int, animation: Int) {
+
+        val Red = red.toByte() //Rouge
+        val Blue = green.toByte() //Vert
+        val Green = blue.toByte() //Blue
+        val Animation = animation.toByte() //Blue
+
+        val colorPacket = byteArrayOf(0xFF.toByte(), Red, Green, Blue, Animation)
+        colorWriteCharacteristic?.value = colorPacket
+
+        bluetoothGatt?.writeCharacteristic(colorWriteCharacteristic)
+
+        Log.d("BLE", "Message envoyé: $Red,\t $green, \t $blue, \t $animation")
+    }
+
 }

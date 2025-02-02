@@ -1,6 +1,5 @@
 package com.example.orchestrion
 
-import BleManager
 import android.content.Intent
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.isSystemInDarkTheme
@@ -21,6 +20,10 @@ import androidx.compose.material3.ShapeDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.paint
@@ -46,7 +49,7 @@ fun MainScreenPreview() {
     MainScreen(
         navController = null,
         viewmodel = viewModel,
-        BLeManager = null
+        bleManager = null
     )
 }
 
@@ -54,10 +57,8 @@ fun MainScreenPreview() {
 fun MainScreen(
     navController: NavController?,
     viewmodel: ColorViewModel,
-    BLeManager: BleManager?
+    bleManager: BleManager?
 ) {
-
-
     var buttonColor = ButtonColors(
         Color.Transparent, Color.Black,
         Color.Transparent, Color.Black
@@ -65,6 +66,7 @@ fun MainScreen(
     var textcolor = Color.Black
     var buttonborder = BorderStroke(2.dp, Color.Black)
     var logo = R.drawable.symphonie_branding_light
+
 
     if (isSystemInDarkTheme()) {
         logo = R.drawable.symphonie_branding_dark
@@ -76,12 +78,17 @@ fun MainScreen(
         buttonborder = BorderStroke(2.dp, Color.White)
     }
 
-    
-    LaunchedEffect(pulseRateMs) { // Restart the effect when the pulse rate changes
+
+    var connectedColor by remember { mutableStateOf(Color.Red) }
+    LaunchedEffect(bleManager?.isOrchestrionConnected()) {
         while (isActive) {
-            delay(pulseRateMs) // Pulse the alpha every pulseRateMs to alert the user
-            alpha.animateTo(0f)
-            alpha.animateTo(1f)
+            connectedColor = if (bleManager?.isOrchestrionConnected() == true) {
+                Color.Green
+            } else {
+                Color.Red
+            }
+            //Log.d("BLE", "Connected: ${bleManager?.isOrchestrionConnected()} - $ConnectedColor")
+            delay(1000)
         }
     }
 
@@ -160,6 +167,7 @@ fun MainScreen(
                     colors = buttonColor,
                     modifier = buttonModifier,
                     onClick = {
+                        bleManager?.startScan()
                         navController?.navigate(ConfigScreen)
                     }) {
                     Text(
@@ -179,7 +187,7 @@ fun MainScreen(
                     }) {
                     Text(
                         text = "ColorPicker",
-                        color = textcolor,
+                        color = viewmodel.getTC(),
                         fontSize = 20.sp
                     )
                 }
@@ -197,11 +205,11 @@ fun MainScreen(
                         modifier = Modifier
                             .padding(6.dp),
                         onClick = {
-                            myMQTT.reconnectToMqttBroker(context = context)
+                            bleManager?.reconnectToESP32()
                         }) {
                         Text(
                             text = "Reconnect",
-                            color = connectedcolor,
+                            color = connectedColor,
                             fontSize = 20.sp
                         )
                     }

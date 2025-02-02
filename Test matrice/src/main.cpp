@@ -88,12 +88,9 @@ void scan(){
     {
       if (digitalRead(cols[num_col]) == LOW) // Détection état bas
       {
-        delay(10); // Anti-rebond court
-        if (digitalRead(cols[num_col]) == LOW) // Vérification stable
-        {
           col_select = num_col;
           row_select = ligne_actuelle;
-        }
+        
       }
     }
     ligne_actuelle = (ligne_actuelle+1)%3;
@@ -123,3 +120,4 @@ void toucherBouton(uint8_t num_ligne, uint8_t num_col)
   else if (num_col == 2 && num_ligne == 2) btn = btn_tab[8];
   else btn = btn_tab[9]; // Aucune touche détectée
 }
+

@@ -1,6 +1,5 @@
 package com.example.orchestrion
 
-import BleManager
 import android.animation.ObjectAnimator
 import android.os.Bundle
 import android.util.Log
@@ -25,23 +24,10 @@ import kotlinx.serialization.Serializable
 
 class MainActivity : ComponentActivity() {
 
-    private val viewModel by viewModels<SplashScreenViewModel>()
+    private val viewModel by viewModels<ViewModel>()
     private val colorViewModel by viewModels<ColorViewModel>()
 
     private lateinit var bleManager: BleManager
-
-    private val requestPermissionLauncher = registerForActivityResult(
-        ActivityResultContracts.RequestMultiplePermissions()
-    ) { permissions ->
-        if (permissions.all { it.value }) {
-            // Toutes les permissions sont accordées, démarrer le scan
-            bleManager.startScan()
-        } else {
-            // Afficher un message d'erreur si les permissions ne sont pas accordées
-            Log.e("BLE", "Permissions refusées")
-        }
-    }
-
 
     override fun onCreate(savedInstanceState: Bundle?) {
 
@@ -81,13 +67,24 @@ class MainActivity : ComponentActivity() {
 
         super.onCreate(savedInstanceState)
 
-        // Initialiser le BleManager avec le contexte de l'activité
+        // Initialiser le com.example.orchestrion.BleManager avec le contexte de l'activité
         bleManager = BleManager(this)
+
+        val requestPermissionLauncher = registerForActivityResult(
+            ActivityResultContracts.RequestMultiplePermissions()
+        ) { permissions ->
+            if (permissions.all { it.value }) {
+                // Toutes les permissions sont accordées
+                bleManager.startScan()
+            } else {
+                // Afficher un message d'erreur si les permissions ne sont pas accordées
+                Log.e("BLE", "Permissions refusées")
+            }
+        }
 
         // Vérifier et demander les permissions
         if (bleManager.hasPermissions()) {
             bleManager.askBluetoothActivation(this)
-            // Démarrer le scan BLE si les permissions sont déjà accordées
             bleManager.startScan()
         } else {
             // Demander les permissions
@@ -112,7 +109,7 @@ class MainActivity : ComponentActivity() {
                         MainScreen(
                             viewmodel = colorViewModel,
                             navController = navController,
-                            BLeManager = bleManager
+                            bleManager =  bleManager
                         )
                     }
                     composable<Colorpicker> {
@@ -136,7 +133,9 @@ class MainActivity : ComponentActivity() {
                             BLeManager = bleManager
                         )
                     }
+                    composable<Piano> {
 
+                    }
                     composable<TestFichier> {
                         FileOperationsScreen(LocalContext.current)
                     }
@@ -157,6 +156,9 @@ object Colorpicker
 
 @Serializable
 object ImgColorPicker
+
+@Serializable
+object Piano
 
 @Serializable
 object TestFichier

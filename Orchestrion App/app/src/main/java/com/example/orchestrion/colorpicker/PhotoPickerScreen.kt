@@ -63,12 +63,6 @@ fun ImgColorPicker(
         navController?.navigate(ConfigScreen)
     }
 
-    val phare: Int by remember {
-        mutableIntStateOf(viewModel.getPhare())
-    }
-    val zone: Int by remember {
-        mutableIntStateOf(viewModel.getZone())
-    }
     var red10: Int by remember {
         mutableIntStateOf(viewModel.red10)
     }
@@ -118,10 +112,6 @@ fun ImgColorPicker(
                     alpha10 = (colorEnvelope.color.alpha * 255).toInt()
 
                     viewModel.setTC(textColor)
-                    viewModel.majTextsColors()//nom a changer
-
-                    myMQTT.publish("phare", "$phare")
-                    myMQTT.publish("zone", "$zone")
                     myMQTT.publish("red", "$red10")
                     myMQTT.publish("blue", "$blue10")
                     myMQTT.publish("green", "$green10")

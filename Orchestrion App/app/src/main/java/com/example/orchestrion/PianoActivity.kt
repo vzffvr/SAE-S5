@@ -7,11 +7,14 @@ import android.graphics.Color
 import android.os.Bundle
 import android.os.Handler
 import android.util.Log
+import android.view.MotionEvent
 import android.view.View
 import android.widget.Button
 import android.widget.HorizontalScrollView
 import android.widget.SeekBar
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.ViewModelProvider
 
 class PianoActivity : AppCompatActivity() {
 
@@ -27,6 +30,9 @@ class PianoActivity : AppCompatActivity() {
 
         )
 
+
+    private lateinit var viewModel: ViewModel
+
     private lateinit var keys: Array<Button>
 
     @SuppressLint("ClickableViewAccessibility")
@@ -39,6 +45,10 @@ class PianoActivity : AppCompatActivity() {
                 or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
                 or View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY)
         setContentView(R.layout.activity_piano)
+
+        viewModel= ViewModelProvider(this)[ViewModel::class.java]
+
+//        val bleManager = viewModel.BLEManager
 
         val seekBar = findViewById<SeekBar>(R.id.seekBar)
         val scrollView = findViewById<HorizontalScrollView>(R.id.scrollView)
@@ -63,24 +73,50 @@ class PianoActivity : AppCompatActivity() {
 
         val whiteKeys = whiteKeyIds.mapIndexed { index, keyId ->
             findViewById<Button>(keyId).apply {
-                setOnClickListener {
-                    setBackgroundColor(Color.parseColor("#80ffe5"))
-                    Log.d("INDEX", "$index")
-                    Handler().postDelayed({
-                        setBackgroundColor(Color.WHITE)
-                    }, 100)
+                setOnTouchListener { _, event ->
+                    when (event.action) {
+                        MotionEvent.ACTION_DOWN -> {
+//                            if(bleManager.isOrchestrionConnected())
+//                                bleManager.sendMidiMessage(0x91, index+100, 0xFF)
+                            setBackgroundColor(Color.parseColor("#80ffe5"))
+                            Log.d("index", "$index")
+                            Handler().postDelayed({
+                                setBackgroundColor(Color.WHITE)
+                            }, 100)
+                            true
+                        }
+                        MotionEvent.ACTION_UP -> {
+//                            if(bleManager.isOrchestrionConnected())
+//                                bleManager.sendMidiMessage(0x91 , index+100, 0x00)
+                            true
+                        }
+                        else -> false // Pour les autres événements, retourne false
+                    }
                 }
             }
         }
 
         val blackKeys = blackKeyIds.mapIndexed { index, keyId ->
             findViewById<Button>(keyId).apply {
-                setOnClickListener {
-                    setBackgroundColor(Color.parseColor("#80ffe5"))
-                    Log.d("index", "$index")
-                    Handler().postDelayed({
-                        setBackgroundColor(Color.BLACK)
-                    }, 100)
+                setOnTouchListener { _, event ->
+                    when (event.action) {
+                        MotionEvent.ACTION_DOWN -> {
+//                            if(bleManager.isOrchestrionConnected())
+//                                bleManager.sendMidiMessage(0x91, index+100, 0xFF)
+                            setBackgroundColor(Color.parseColor("#80ffe5"))
+                            Log.d("index", "$index")
+                            Handler().postDelayed({
+                                setBackgroundColor(Color.BLACK)
+                            }, 100)
+                            true
+                        }
+                        MotionEvent.ACTION_UP -> {
+//                            if(bleManager.isOrchestrionConnected())
+//                                bleManager.sendMidiMessage(0x91, index+100, 0x00)
+                            true
+                        }
+                        else -> false // Pour les autres événements, retourne false
+                    }
                 }
             }
         }

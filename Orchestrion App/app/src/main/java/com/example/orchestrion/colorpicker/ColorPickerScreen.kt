@@ -1,7 +1,7 @@
 package com.example.orchestrion.colorpicker
 
 
-import BleManager
+import com.example.orchestrion.BleManager
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -30,8 +29,8 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.orchestrion.Spinner
 import com.example.orchestrion.TextPreview
-import com.github.skydoves.colorpicker.compose.AlphaSlider
 import com.github.skydoves.colorpicker.compose.AlphaTile
+import com.github.skydoves.colorpicker.compose.BrightnessSlider
 import com.github.skydoves.colorpicker.compose.ColorEnvelope
 import com.github.skydoves.colorpicker.compose.HsvColorPicker
 import com.github.skydoves.colorpicker.compose.rememberColorPickerController
@@ -57,21 +56,10 @@ fun ColorPicker(
 
 //    BackHandler()
 //    {
-//        if (viewModel.getPhare() == 3) {
-//            navController?.navigate(PhareScreen)
-//        } else {
-//            navController?.navigate(PhareScreen)
-//        }
 //    }
 
-    val phare: Int by remember {
-        mutableIntStateOf(viewModel.getPhare())
-    }
-    val zone: Int by remember {
-        mutableIntStateOf(viewModel.getZone())
-    }
     var animation: Int by remember {
-        mutableIntStateOf(viewModel.getAnimation())
+        mutableIntStateOf(viewModel.animation)
     }
     var red10: Int by remember {
         mutableIntStateOf(viewModel.red10)
@@ -86,10 +74,6 @@ fun ColorPicker(
         mutableIntStateOf(viewModel.alpha10)
     }
 
-    var intensity_ref: Int by remember {
-        mutableIntStateOf(viewModel.intensity_ref)
-    }
-
     val options = listOf("Disabled", "Ambiance", "ColorWipe", "WipeCenter", "WipeEdge")
 
     var hexCode by remember { mutableStateOf(viewModel.hexCode) }
@@ -97,35 +81,6 @@ fun ColorPicker(
 
     val controller = rememberColorPickerController()
 
-
-    LaunchedEffect(Unit) { // Le paramètre "Unit" garantit que l'effet est exécuté une seule fois à la création
-        myMQTT.publish("phare", "$phare")
-        myMQTT.publish("zone", "$zone")
-
-        myMQTT.publish("animation", "$animation")
-
-        myMQTT.publish("red", "$red10")
-        myMQTT.publish("blue", "$blue10")
-        myMQTT.publish("green", "$green10")
-        myMQTT.publish("intensite", "$alpha10")
-
-        myMQTT.publish("intensite_ref", "${viewModel.intensity_ref}")
-    }
-
-    // Envoyer des données à la reprise du composable
-    LaunchedEffect(key1 = Unit) { // Le paramètre "key1" permet de redéclencher l'effet si nécessaire
-        myMQTT.publish("phare", "$phare")
-        myMQTT.publish("zone", "$zone")
-
-        myMQTT.publish("animation", "$animation")
-
-        myMQTT.publish("red", "$red10")
-        myMQTT.publish("blue", "$blue10")
-        myMQTT.publish("green", "$green10")
-        myMQTT.publish("intensite", "$alpha10")
-
-        myMQTT.publish("intensite_ref", "${viewModel.intensity_ref}")
-    }
 
 
     Box(
@@ -156,33 +111,24 @@ fun ColorPicker(
 
                     hexCode = colorEnvelope.hexCode
 
+                    alpha10 = (colorEnvelope.color.alpha * 255).toInt()
+
                     red10 = (colorEnvelope.color.red * 255).toInt()
                     green10 = (colorEnvelope.color.green * 255).toInt()
                     blue10 = (colorEnvelope.color.blue * 255).toInt()
-                    alpha10 = (colorEnvelope.color.alpha * 255).toInt()
+
 
                     viewModel.setTC(textColor)
-                    viewModel.majTextsColors()//nom a changer
 
-                    animation = viewModel.getAnimation()
+                    animation = viewModel.animation
 
-                    myMQTT.publish("phare", "${viewModel.getPhare()}")
-                    myMQTT.publish("zone", "$zone")
-
-                    myMQTT.publish("animation", "$animation")
-
-                    myMQTT.publish("red", "$red10")
-                    myMQTT.publish("blue", "$blue10")
-                    myMQTT.publish("green", "$green10")
-                    myMQTT.publish("intensite", "$alpha10")
-
-                    myMQTT.publish("intensite_ref", "${viewModel.intensity_ref}")
+                    BLeManager?.sendColorOrder(red10, green10, blue10, animation)
                 }
             )
 
             Spacer(modifier = Modifier.fillMaxHeight(0.1f))
 
-            AlphaSlider(
+            BrightnessSlider(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(10.dp)
@@ -195,8 +141,6 @@ fun ColorPicker(
 
 
             Spacer(modifier = Modifier.fillMaxHeight(0.12f))
-
-
 
             Row(
                 Modifier.fillMaxWidth(),
@@ -212,7 +156,7 @@ fun ColorPicker(
 //                {
 
 
-                Spinner(viewModel, myMQTT, options, "Animation")
+                Spinner(viewModel, BLeManager, options, "Animation")
 
 
 //                    Button(

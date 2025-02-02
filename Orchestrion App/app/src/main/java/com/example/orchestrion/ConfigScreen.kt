@@ -1,6 +1,5 @@
 package com.example.orchestrion
 
-import BleManager
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -139,7 +138,7 @@ fun ConfigScreen(
 
                 Spacer(modifier = Modifier.height(30.dp))
 
-                Spinner(viewmodel, myMQTT, options, "Forme du signal")
+                //Spinner(viewmodel, myMQTT, options, "Forme du signal")
 
                 Spacer(modifier = Modifier.height(30.dp))
 
@@ -159,7 +158,7 @@ fun ConfigScreen(
                         modifier = Modifier
                             .padding(6.dp),
                         onClick = {
-                            myMQTT.reconnectToMqttBroker(context = context)
+//                            myMQTT.reconnectToMqttBroker(context = context)
                         }) {
                         Text(
                             text = "Reconnect",

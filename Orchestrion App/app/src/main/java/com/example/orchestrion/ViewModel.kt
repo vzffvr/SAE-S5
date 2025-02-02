@@ -7,15 +7,20 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
-class SplashScreenViewModel: ViewModel() {
+class ViewModel: ViewModel() {
     private val _isReady = MutableStateFlow(false)
     val isready = _isReady.asStateFlow()
 
+    lateinit var BLEManager: BleManager
 
     init {
         viewModelScope.launch {
             delay(1000L)
             _isReady.value = true
         }
+    }
+
+    fun setBLeManager(bleManager: BleManager) {
+        BLEManager = bleManager
     }
 }
