@@ -80,7 +80,7 @@ fun ColorPicker(
     var textColor by remember { mutableStateOf(viewModel.textColor) }
 
     val controller = rememberColorPickerController()
-
+    //controller.debounceDuration = 50L
 
 
     Box(
@@ -150,10 +150,6 @@ fun ColorPicker(
                 Spacer(modifier = Modifier.fillMaxWidth(0.1f))
 
 
-//                Column(
-//                    horizontalAlignment = Alignment.End,
-//                    )
-//                {
 
 
                 Spinner(viewModel, BLeManager, options, "Animation")
@@ -188,7 +184,7 @@ fun ColorPicker(
 //                        )
 //
 //                    }
-//                }
+//
 
 
             }

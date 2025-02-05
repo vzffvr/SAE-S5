@@ -14,6 +14,7 @@ import android.widget.HorizontalScrollView
 import android.widget.SeekBar
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 
 class PianoActivity : AppCompatActivity() {
@@ -30,9 +31,6 @@ class PianoActivity : AppCompatActivity() {
 
         )
 
-
-    private lateinit var viewModel: ViewModel
-
     private lateinit var keys: Array<Button>
 
     @SuppressLint("ClickableViewAccessibility")
@@ -46,9 +44,10 @@ class PianoActivity : AppCompatActivity() {
                 or View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY)
         setContentView(R.layout.activity_piano)
 
-        viewModel= ViewModelProvider(this)[ViewModel::class.java]
 
-//        val bleManager = viewModel.BLEManager
+
+//        val bleManager = intent.getParcelableExtra<BleManager>("bleManager")
+//        bleManager?.initializeWithContext(this)
 
         val seekBar = findViewById<SeekBar>(R.id.seekBar)
         val scrollView = findViewById<HorizontalScrollView>(R.id.scrollView)
@@ -76,8 +75,11 @@ class PianoActivity : AppCompatActivity() {
                 setOnTouchListener { _, event ->
                     when (event.action) {
                         MotionEvent.ACTION_DOWN -> {
-//                            if(bleManager.isOrchestrionConnected())
-//                                bleManager.sendMidiMessage(0x91, index+100, 0xFF)
+//                                if(bleManager?.isOrchestrionConnected() == true)
+//                                    bleManager.sendMidiMessage(0x91, index+100, 0xFF)
+//                                else
+//                                    Log.d("BLE", bleManager?.isOrchestrionConnected().toString())
+
                             setBackgroundColor(Color.parseColor("#80ffe5"))
                             Log.d("index", "$index")
                             Handler().postDelayed({
@@ -86,8 +88,10 @@ class PianoActivity : AppCompatActivity() {
                             true
                         }
                         MotionEvent.ACTION_UP -> {
-//                            if(bleManager.isOrchestrionConnected())
-//                                bleManager.sendMidiMessage(0x91 , index+100, 0x00)
+//                                if(bleManager?.isOrchestrionConnected() == true)
+//                                    bleManager.sendMidiMessage(0x91 , index+100, 0x00)
+//                                else
+//                                    Log.d("BLE", bleManager?.isOrchestrionConnected().toString())
                             true
                         }
                         else -> false // Pour les autres événements, retourne false
@@ -101,8 +105,11 @@ class PianoActivity : AppCompatActivity() {
                 setOnTouchListener { _, event ->
                     when (event.action) {
                         MotionEvent.ACTION_DOWN -> {
-//                            if(bleManager.isOrchestrionConnected())
-//                                bleManager.sendMidiMessage(0x91, index+100, 0xFF)
+//                                if(bleManager?.isOrchestrionConnected() == true)
+//                                    bleManager.sendMidiMessage(0x91, index+100, 0xFF)
+//                                else
+//                                    Log.d("BLE", bleManager?.isOrchestrionConnected().toString())
+
                             setBackgroundColor(Color.parseColor("#80ffe5"))
                             Log.d("index", "$index")
                             Handler().postDelayed({
@@ -111,8 +118,11 @@ class PianoActivity : AppCompatActivity() {
                             true
                         }
                         MotionEvent.ACTION_UP -> {
-//                            if(bleManager.isOrchestrionConnected())
-//                                bleManager.sendMidiMessage(0x91, index+100, 0x00)
+//                                if(bleManager?.isOrchestrionConnected() == true)
+//                                    bleManager.sendMidiMessage(0x91, index+100, 0x00)
+//                                else
+//                                    Log.d("BLE", bleManager?.isOrchestrionConnected().toString())
+
                             true
                         }
                         else -> false // Pour les autres événements, retourne false

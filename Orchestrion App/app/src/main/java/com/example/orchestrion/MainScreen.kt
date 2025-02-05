@@ -34,6 +34,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.content.ContextCompat.startActivity
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.orchestrion.colorpicker.ColorViewModel
@@ -151,7 +152,10 @@ fun MainScreen(
                     colors = buttonColor,
                     modifier = buttonModifier,
                     onClick = {
-                        context.startActivity(Intent(context, PianoActivity::class.java))
+                        val intent =  Intent(context, PianoActivity::class.java)
+                        intent.putExtra("bleManager", bleManager)
+                        context.startActivity(intent)
+//                        context.startActivity(Intent(context, PianoActivity::class.java))
                     }
                 ) {
                     Text(

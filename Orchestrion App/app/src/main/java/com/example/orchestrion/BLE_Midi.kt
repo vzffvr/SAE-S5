@@ -15,13 +15,22 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Handler
+import android.os.Parcel
+import android.os.Parcelable
 import android.util.Log
 import android.widget.Toast
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import java.util.UUID
 
-class BleManager(private val context: Context) {
+class BleManager() :Parcelable{
+
+    var someProperty: String = ""
+    private lateinit var context:Context
+
+    constructor(_context: Context) : this() {
+          context = _context
+    }
 
     val requiredPermissions = arrayOf(
         Manifest.permission.BLUETOOTH,
@@ -130,6 +139,8 @@ class BleManager(private val context: Context) {
         }
     }
 
+
+
     @SuppressLint("MissingPermission")
     fun isOrchestrionConnected(): Boolean {
         return bluetoothGatt?.device?.name.equals("ESP32 BLE Instrument")
@@ -207,6 +218,31 @@ class BleManager(private val context: Context) {
         bluetoothGatt?.writeCharacteristic(colorWriteCharacteristic)
 
         Log.d("BLE", "Message envoyé: $Red,\t $green, \t $blue, \t $animation")
+    }
+
+    // Constructeur pour Parcelable
+    constructor(parcel: Parcel) : this() {
+        someProperty = parcel.readString() ?: ""
+    }
+
+    override fun writeToParcel(parcel: Parcel, flags: Int) {
+        // Écrivez les données nécessaires dans le Parcel
+    }
+
+    override fun describeContents(): Int {
+        return 0
+    }
+
+
+
+    companion object CREATOR : Parcelable.Creator<BleManager> {
+        override fun createFromParcel(parcel: Parcel): BleManager {
+            return BleManager(parcel)
+        }
+
+        override fun newArray(size: Int): Array<BleManager?> {
+            return arrayOfNulls(size)
+        }
     }
 
 }

@@ -1,6 +1,7 @@
 package com.example.orchestrion
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -11,7 +12,6 @@ class ViewModel: ViewModel() {
     private val _isReady = MutableStateFlow(false)
     val isready = _isReady.asStateFlow()
 
-    lateinit var BLEManager: BleManager
 
     init {
         viewModelScope.launch {
@@ -20,7 +20,4 @@ class ViewModel: ViewModel() {
         }
     }
 
-    fun setBLeManager(bleManager: BleManager) {
-        BLEManager = bleManager
-    }
 }
