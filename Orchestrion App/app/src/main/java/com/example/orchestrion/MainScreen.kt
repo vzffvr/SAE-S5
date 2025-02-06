@@ -1,6 +1,7 @@
 package com.example.orchestrion
 
 import android.content.Intent
+import android.content.pm.ActivityInfo
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement

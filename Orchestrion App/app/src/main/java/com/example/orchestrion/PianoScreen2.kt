@@ -1,9 +1,13 @@
 package com.example.orchestrion
 
+import android.app.Activity
+import android.content.pm.ActivityInfo
+import android.graphics.drawable.BitmapDrawable
 import android.util.Log
 import android.view.MotionEvent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -21,10 +25,13 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Slider
+import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -33,41 +40,38 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.composed
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.input.pointer.pointerInteropFilter
 import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
+import androidx.core.content.ContextCompat
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-
-//val whiteButtonStyle = Modifier
-//    .weight(1f)
-//    .width(74.dp)
-//    .fillMaxHeight()
-//    .padding(2.dp,0.dp,0.dp,8.dp,)
-
-val blackButtonStyle = Modifier
-    .width(52.dp)
-    .fillMaxHeight()
-    .padding(2.dp, 0.dp, 0.dp, 8.dp)// Gravity center
+import kotlin.text.toFloat
 
 
 @Composable
-//@Preview
 fun Previewbutton() {
-    WhiteKeyButton("A1", 1)
+    WhiteKey("A1", 1)
 }
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
-fun WhiteKeyButton(
-    text: String,
-    index: Int,
+fun WhiteKey(
+    text: String = "",
+    index: Int = 0,
     onPress: () -> Unit = {},
     onRelease: () -> Unit = {}
 ) {
@@ -85,7 +89,6 @@ fun WhiteKeyButton(
             .pointerInteropFilter { motionEvent ->
                 when (motionEvent.action) {
                     MotionEvent.ACTION_DOWN -> {
-                        // Change le fond en #80ffe5 lors de l'appui et log l'index
                         backgroundColor = Color(android.graphics.Color.parseColor("#80ffe5"))
                         Log.d("KeyButton", "index: $index")
                         coroutineScope.launch {
@@ -127,89 +130,129 @@ fun WhiteKeyButton(
 //@Preview
 @Composable
 fun SharpkeyPreview() {
-    SharpKeyButton(0, "B1")
+    BlackKey(0, "B1")
 }
 
-@Preview
 @Composable
-fun CustomSeekBarWithScroll() {
-    // État du slider (valeur entre 0 et 100, initialement 50)
-    var sliderValue by remember { mutableStateOf(50f) }
+fun CustomSeekBarWithScroll(content: @Composable () -> Unit = {}) {
+
+    var sliderValue by remember { mutableFloatStateOf(50f) } // Initialiser à 50 pour centrer le thumb
     val scrollState = rememberScrollState()
 
     // Pour mesurer la largeur visible (du conteneur scrollable) et celle du contenu
     var containerSize by remember { mutableStateOf(IntSize.Zero) }
     var contentSize by remember { mutableStateOf(IntSize.Zero) }
 
+    val context = LocalContext.current
+    val trackDrawable = ContextCompat.getDrawable(context, R.drawable.scrollbgm)
+    val thumbDrawable = ContextCompat.getDrawable(context, R.drawable.thumb)
+    val trackBitmap = (trackDrawable as BitmapDrawable).bitmap
+    val thumbBitmap = (thumbDrawable as BitmapDrawable).bitmap
+
     val coroutineScope = rememberCoroutineScope()
 
-    // Après la composition, si les dimensions sont connues, on positionne le scroll à 55%
+    // Après la composition, si les dimensions sont connues, on positionne le scroll à 50%
     LaunchedEffect(containerSize, contentSize) {
         if (contentSize.width > containerSize.width) {
             val maxScroll = contentSize.width - containerSize.width
-            val targetScroll = (maxScroll * 0.55f).toInt()
+            val targetScroll = (maxScroll * 0.5f).toInt() // Position à 50%
             scrollState.scrollTo(targetScroll)
-            // Mettre à jour le slider en conséquence
-            sliderValue = targetScroll * 100f / maxScroll
+        }
+    }
+    // Mettre à jour la valeur du slider quand le scroll change
+    val currentScrollPosition = remember { derivedStateOf { scrollState.value } }
+    LaunchedEffect(currentScrollPosition.value, containerSize, contentSize) {
+        if (contentSize.width > containerSize.width) {
+            val maxScroll = contentSize.width - containerSize.width
+            val currentScroll = currentScrollPosition.value
+            val newSliderValue = (currentScroll.toFloat() / maxScroll) * 100f
+            sliderValue = newSliderValue
         }
     }
 
-    Column(modifier = Modifier.fillMaxSize()) {
-        // Slider imitant le SeekBar
-        Slider(
-            value = sliderValue,
-            onValueChange = { newValue ->
-                sliderValue = newValue
-                // Calcul de la position de scroll en fonction du slider (0 à 100)
-                if (contentSize.width > containerSize.width) {
-                    val maxScroll = contentSize.width - containerSize.width
-                    val targetScroll = (maxScroll * newValue / 100f).toInt()
-                    coroutineScope.launch {
-                        scrollState.scrollTo(targetScroll)
-                    }
-                }
-            },
-            valueRange = 0f..100f,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(start = 100.dp, end = 100.dp, top = 10.dp, bottom = 10.dp)
-            // Pour reproduire exactement thumb/background, il faudrait customiser le Slider.
-        )
-
-        // "ScrollView" horizontal qui ne répond pas aux gestes tactiles (défilement manuel bloqué)
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .weight(1f)
-                // Mesurer la taille du conteneur visible
-                .onGloballyPositioned { coordinates ->
-                    containerSize = coordinates.size
-                }
-                // Consommer tous les événements tactiles pour bloquer le scroll manuel
-                .noTouchScrolling()
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
         ) {
-            Row(
+            Slider(
+                value = sliderValue,
+                onValueChange = { newValue ->
+                    sliderValue = newValue
+                    // Calcul de la position de scroll en fonction du slider (0 à 100)
+                    if (contentSize.width > containerSize.width) {
+                        val maxScroll = contentSize.width - containerSize.width
+                        val targetScroll = (maxScroll * newValue / 100f).toInt()
+                        coroutineScope.launch {
+                            scrollState.scrollTo(targetScroll)
+                        }
+                    }
+                },
+                valueRange = 0f..100f,
                 modifier = Modifier
-                    .horizontalScroll(scrollState)
-                    // Mesurer la taille totale du contenu
+                    .fillMaxWidth()
+                    .drawBehind {
+                        // Dessiner l'image du track
+                        val trackHeight = trackBitmap.height.toFloat()
+                        val trackY = size.height / 2 - trackHeight / 2
+                        drawImage(
+                            image = trackBitmap.asImageBitmap(),
+                            topLeft = Offset(0f, trackY)
+                        )
+                    }
+                    .drawWithContent {
+                        // Dessiner l'image du thumb
+                        drawContent()
+                        // Calcul de la position du thumb sur la longueur du track
+                        val trackWidth = size.width
+                        val thumbWidth = thumbBitmap.width.toFloat()
+                        val availableTrackWidth = trackWidth - thumbWidth
+                        // Centrer le thumb
+                        val thumbX = (sliderValue / 100f) * availableTrackWidth - thumbWidth / 2
+                        val thumbY = size.height / 2 - thumbBitmap.height / 2
+                        drawImage(
+                            image = thumbBitmap.asImageBitmap(),
+                            topLeft = Offset(thumbX, thumbY)
+                        )
+                    },
+                colors = SliderDefaults.colors(
+                    thumbColor = Color.Transparent,
+                    activeTrackColor = Color.Transparent,
+                    inactiveTrackColor = Color.Transparent,
+                )
+            )
+
+            // "ScrollView" horizontal qui ne répond pas aux gestes tactiles (défilement manuel bloqué)
+            Spacer(modifier = Modifier.height(50.dp))
+            Spacer(modifier = Modifier.weight(1f))
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    // Mesurer la taille du conteneur visible
                     .onGloballyPositioned { coordinates ->
-                        contentSize = coordinates.size
+                        containerSize = coordinates.size
                     }
             ) {
-                // Exemple de contenu : ici, vous pouvez placer vos éléments.
-                // Pour la démonstration, créons plusieurs Box.
-                for (i in 1..10) {
-                    Box(
-                        modifier = Modifier
-                            .size(width = 150.dp, height = 200.dp)
-                            .padding(4.dp)
-                            .background(Color.LightGray)
-                    )
+                Row(
+                    modifier = Modifier
+                        .horizontalScroll(scrollState)
+                        // Mesurer la taille totale du contenu
+                        .onGloballyPositioned { coordinates ->
+                            contentSize = coordinates.size
+                        }
+                ) {
+                    content()
                 }
             }
         }
     }
 }
+
 
 /**
  * Modifier qui consomme tous les événements tactiles pour empêcher
@@ -229,14 +272,12 @@ fun Modifier.noTouchScrolling() = composed {
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
-fun SharpKeyButton(
-    index: Int,
+fun BlackKey(
+    index: Int = 0,
     text: String = "",
     onPress: () -> Unit = {},
     onRelease: () -> Unit = {},
-    // Le texte est optionnel (souvent vide pour les touches noires)
 ) {
-    // Couleur de fond initiale : noir (pour simuler @drawable/black_key_background)
     var backgroundColor by remember { mutableStateOf(Color.Black) }
     val coroutineScope = rememberCoroutineScope()
 
@@ -269,7 +310,7 @@ fun SharpKeyButton(
                 }
             },
         colors = ButtonDefaults.buttonColors(containerColor = backgroundColor),
-        shape = RectangleShape, // Coins à 90° (aucun arrondi)
+        shape = RectangleShape,
         contentPadding = PaddingValues(0.dp)
     ) {
         if (text.isNotEmpty()) {
@@ -284,169 +325,47 @@ fun SharpKeyButton(
     }
 }
 
+@Preview(device = "spec:width=1500dp,height=891dp")
 @Composable
 fun PianoUI() {
     Column(
         modifier = Modifier
-            .fillMaxSize()
-            .background(Color.White)
+            .fillMaxWidth(),
     ) {
 
+        Spacer(Modifier.height(50.dp))
 
-        // Top Section with SeekBar
-        Box(
-            modifier = Modifier
-                .weight(1f)
-                .fillMaxWidth()
-                .background(Color(0xFF272727))
-        ) {
-            Slider(
-                value = 50f,
-                onValueChange = { /* Handle value change */ },
-                valueRange = 0f..100f,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 100.dp, vertical = 10.dp)
-            )
-        }
-
-        // Piano Keys Section
-        Box(
-            modifier = Modifier
-                .weight(2f)
-                .fillMaxWidth()
-        ) {
-            Row(
+        CustomSeekBarWithScroll(content = {
+            Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .horizontalScroll(rememberScrollState())
-                    .background(Color.Black)
+                    .background(Color.LightGray)
             ) {
-                // White Keys
-                listOf(
-                    "A1",
-                    "B1",
-                    "C1",
-                    "D1",
-                    "E1",
-                    "F1",
-                    "G1",
-                    "A2",
-                    "B2",
-                    "C2",
-                    "D2",
-                    "E2",
-                    "F2",
-                    "G2"
-                ).forEach { key ->
-                    Button(
-                        onClick = { /* Handle key press */ },
-                        modifier = Modifier
-                            .weight(1f)
-                            .fillMaxHeight(),
-
-                        ) {
-                        Text(text = key)
+                // Dessiner les touches blanches
+                Row(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .align(Alignment.BottomCenter)
+                ) {
+                    repeat(14) { // 14 touches blanches pour une octave
+                        WhiteKey()
+                    }
+                }
+                Row(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .align(Alignment.BottomCenter)
+                        .padding(bottom = 50.dp) // Décaler les touches noires vers le haut
+                ) {
+                    repeat(14) { index ->
+                        if (index % 7 != 2 && index % 7 != 6) { // Position des touches noires
+                            BlackKey()
+                        } else {
+                            Spacer(modifier = Modifier.width(20.dp)) // Espace pour les touches blanches
+                        }
                     }
                 }
             }
-
-            // Black Keys
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(180.dp)
-            ) {
-                Spacer(modifier = Modifier.width(52.dp))
-                Button(
-                    onClick = { /* Handle key press */ },
-                    modifier = Modifier
-                        .weight(1f)
-                        .fillMaxHeight()
-                        .background(Color.Black)
-                ) {}
-
-                Spacer(modifier = Modifier.width(100.dp))
-                Button(
-                    onClick = { /* Handle key press */ },
-                    modifier = Modifier
-                        .weight(1f)
-                        .fillMaxHeight()
-                        .background(Color.Black)
-                ) {}
-
-                Spacer(modifier = Modifier.width(22.dp))
-                Button(
-                    onClick = { /* Handle key press */ },
-                    modifier = Modifier
-                        .weight(1f)
-                        .fillMaxHeight()
-                        .background(Color.Black)
-                ) {}
-
-                Spacer(modifier = Modifier.width(101.dp))
-                Button(
-                    onClick = { /* Handle key press */ },
-                    modifier = Modifier
-                        .weight(1f)
-                        .fillMaxHeight()
-                        .background(Color.Black)
-                ) {}
-
-                Spacer(modifier = Modifier.width(25.dp))
-                Button(
-                    onClick = { /* Handle key press */ },
-                    modifier = Modifier
-                        .weight(1f)
-                        .fillMaxHeight()
-                        .background(Color.Black)
-                ) {}
-
-                Spacer(modifier = Modifier.width(26.dp))
-                Button(
-                    onClick = { /* Handle key press */ },
-                    modifier = Modifier
-                        .weight(1f)
-                        .fillMaxHeight()
-                        .background(Color.Black)
-                ) {}
-
-                Spacer(modifier = Modifier.width(100.dp))
-                Button(
-                    onClick = { /* Handle key press */ },
-                    modifier = Modifier
-                        .weight(1f)
-                        .fillMaxHeight()
-                        .background(Color.Black)
-                ) {}
-
-                Spacer(modifier = Modifier.width(22.dp))
-                Button(
-                    onClick = { /* Handle key press */ },
-                    modifier = Modifier
-                        .weight(1f)
-                        .fillMaxHeight()
-                        .background(Color.Black)
-                ) {}
-
-                Spacer(modifier = Modifier.width(101.dp))
-                Button(
-                    onClick = { /* Handle key press */ },
-                    modifier = Modifier
-                        .weight(1f)
-                        .fillMaxHeight()
-                        .background(Color.Black)
-                ) {}
-
-                Spacer(modifier = Modifier.width(25.dp))
-                Button(
-                    onClick = { /* Handle key press */ },
-                    modifier = Modifier
-                        .weight(1f)
-                        .fillMaxHeight()
-                        .background(Color.Black)
-                ) {}
-            }
-        }
+        })
     }
 }
