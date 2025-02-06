@@ -1,7 +1,6 @@
 package com.example.orchestrion.colorpicker
 
 
-import com.example.orchestrion.BleManager
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -27,7 +26,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import com.example.orchestrion.Spinner
+import com.example.orchestrion.BleManager
+import com.example.orchestrion.SpinnerAnim
 import com.example.orchestrion.TextPreview
 import com.github.skydoves.colorpicker.compose.AlphaTile
 import com.github.skydoves.colorpicker.compose.BrightnessSlider
@@ -152,7 +152,7 @@ fun ColorPicker(
 
 
 
-                Spinner(viewModel, BLeManager, options, "Animation")
+                SpinnerAnim(viewModel, BLeManager, options, "Animation")
 
 
 //                    Button(

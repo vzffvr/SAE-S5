@@ -109,7 +109,7 @@ class MainActivity : ComponentActivity() {
                         MainScreen(
                             viewmodel = colorViewModel,
                             navController = navController,
-                            bleManager =  bleManager
+                            bleManager = bleManager
                         )
                     }
                     composable<Colorpicker> {
@@ -134,7 +134,7 @@ class MainActivity : ComponentActivity() {
                         )
                     }
                     composable<Piano> {
-
+                        PianoUI()
                     }
                     composable<TestFichier> {
                         FileOperationsScreen(LocalContext.current)

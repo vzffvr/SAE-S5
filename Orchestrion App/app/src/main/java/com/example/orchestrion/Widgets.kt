@@ -59,7 +59,7 @@ fun TextPreview(red: Int, green: Int, blue: Int, alpha: Int, textColor: Color) {
 
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
-fun Spinner(
+fun SpinnerAnim(
     viewModel: ColorViewModel,
     bleManager: BleManager?,
     options: List<String>,
@@ -76,7 +76,13 @@ fun Spinner(
         OutlinedTextField(
             modifier = Modifier.menuAnchor(MenuAnchorType.PrimaryNotEditable),
             value = text,
-            onValueChange = {bleManager?.sendColorOrder(viewModel.red10, viewModel.green10, viewModel.blue10, viewModel.animation)
+            onValueChange = {
+                bleManager?.sendColorOrder(
+                    viewModel.red10,
+                    viewModel.green10,
+                    viewModel.blue10,
+                    viewModel.animation
+                )
             },
             readOnly = true,
             singleLine = true,
@@ -102,7 +108,76 @@ fun Spinner(
                         text = option
                         expanded = false
                         viewModel.animation = (options.indexOf(option) + 1)
-                        bleManager?.sendColorOrder(viewModel.red10, viewModel.green10, viewModel.blue10, options.indexOf(option) + 1)
+                        bleManager?.sendColorOrder(
+                            viewModel.red10,
+                            viewModel.green10,
+                            viewModel.blue10,
+                            options.indexOf(option) + 1
+                        )
+                    },
+                    contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding,
+                )
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun SpinnerConfig(
+    viewModel: ColorViewModel,
+    bleManager: BleManager?,
+    options: List<String>,
+    titre: String?,
+) {
+
+    var expanded by remember { mutableStateOf(false) }
+    var text by remember { mutableStateOf(options[0]) }
+
+    ExposedDropdownMenuBox(
+        expanded = expanded,
+        onExpandedChange = { expanded = it },
+    ) {
+        OutlinedTextField(
+            modifier = Modifier.menuAnchor(MenuAnchorType.PrimaryNotEditable),
+            value = text,
+            onValueChange = {
+//                bleManager?.sendGenericOrder(
+//                    viewModel.red10,
+//                    viewModel.green10,
+//                    viewModel.blue10,
+//                    viewModel.animation
+//                )
+            },
+            readOnly = true,
+            singleLine = true,
+            label = {
+                if (titre != null) {
+                    Text(titre)
+                }
+            },
+            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
+            colors = ExposedDropdownMenuDefaults.outlinedTextFieldColors(
+                disabledContainerColor = Color(255, 0, 0, 255),
+                focusedBorderColor = Color.Gray
+            )
+        )
+        ExposedDropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { expanded = false },
+        ) {
+            options.forEach { option ->
+                DropdownMenuItem(
+                    text = { Text(option, style = MaterialTheme.typography.bodyLarge) },
+                    onClick = {
+                        text = option
+                        expanded = false
+                        bleManager?.sendGenericOrder(
+                            options.indexOf(option) + 1,
+                            0,
+                            0,
+                            0
+                        )
                     },
                     contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding,
                 )

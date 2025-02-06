@@ -138,7 +138,7 @@ fun ConfigScreen(
 
                 Spacer(modifier = Modifier.height(30.dp))
 
-                //Spinner(viewmodel, myMQTT, options, "Forme du signal")
+                SpinnerConfig(viewmodel, BLeManager, options, "Forme du signal")
 
                 Spacer(modifier = Modifier.height(30.dp))
 

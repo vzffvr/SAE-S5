@@ -22,6 +22,7 @@ orgEclipsePahoAndroidService = "1.1.1"
 orgEclipsePahoClientMqttv3 = "1.2.5"
 serialization = "1.6.3"
 uiTextGoogleFonts = "1.7.4"
+foundationLayoutAndroid = "1.7.2"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -52,6 +53,7 @@ navigation-compose = { module = "androidx.navigation:navigation-compose", versio
 kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "serialization" }
 org-eclipse-paho-android-service = { module = "org.eclipse.paho:org.eclipse.paho.android.service", version.ref = "orgEclipsePahoAndroidService" }
 org-eclipse-paho-client-mqttv3 = { module = "org.eclipse.paho:org.eclipse.paho.client.mqttv3", version.ref = "orgEclipsePahoClientMqttv3" }
+androidx-foundation-layout-android = { group = "androidx.compose.foundation", name = "foundation-layout-android", version.ref = "foundationLayoutAndroid" }
 
 
 [plugins]

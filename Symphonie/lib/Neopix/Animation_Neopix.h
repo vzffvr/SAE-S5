@@ -3,7 +3,7 @@
     #include <Adafruit_NeoPixel.h>
 
  
-#define NUMPIXELS 136
+#define NUMPIXELS 200
 
 class Animation_Neopix{
     private:

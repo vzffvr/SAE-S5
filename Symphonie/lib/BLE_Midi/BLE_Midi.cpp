@@ -30,6 +30,28 @@ class MidiCharacteristicCallbacks : public BLECharacteristicCallbacks {
     }
 };
 
+class GenericCharacteristicCallbacks : public BLECharacteristicCallbacks {
+    void onWrite(BLECharacteristic* pCharacteristic) override {
+        // Récupérer les données reçues
+        std::string value = pCharacteristic->getValue();
+        const uint8_t* data = reinterpret_cast<const uint8_t*>(value.data()); // Convertis le tableau value.data dans en un uint8_t*
+        size_t length = value.length();
+
+        if(data[0] == 0x00) {
+        uint8_t forme_signal = data[1];   
+        uint8_t content2 = data[2];  
+        uint8_t content3 = data[3]; 
+        uint8_t content4 = data[4]; 
+
+        Serial.printf("Donnée Generic reçue : Donnée 1 = %d \t, Donnée 2 = %d \t, Donnée 3 = %d \t, Donnée 3 = %d \n", forme_signal, content2, content3, content4);
+
+        } else {
+            Serial.println("Erreur : Taille des données incorrecte");
+        }
+        
+    }
+};
+
 class ColorCharacteristicCallbacks : public BLECharacteristicCallbacks {
     void onWrite(BLECharacteristic* pCharacteristic) override {
         // Récupérer les données reçues
@@ -46,16 +68,7 @@ class ColorCharacteristicCallbacks : public BLECharacteristicCallbacks {
             uint8_t blue = data[3];   // Bleu
             uint8_t animation = data[4]; // Animation
 
-            // Afficher les valeurs reçues
-            Serial.print("Donnée Couleur reçue : ");
-            Serial.print("Rouge = ");
-            Serial.print(red);
-            Serial.print(", Vert = ");
-            Serial.print(green);
-            Serial.print(", Bleu = ");
-            Serial.print(blue);
-            Serial.print(", Animation = ");
-            Serial.println(animation);
+            Serial.printf("Donnée Couleur reçue : RED = %d \t, GREEN = %d \t, BLUE = %d \t, ANIM = %d \n", red, green, blue, animation);
 
         } else {
             Serial.println("Erreur : Taille des données incorrecte");
@@ -90,6 +103,14 @@ void BLE_Midi::initBLE()
         BLECharacteristic::PROPERTY_NOTIFY
     );
 
+    BLECharacteristic *genericCharacteristic;
+    genericCharacteristic = pService->createCharacteristic(
+        CHARACTERISTIC_GENERIC_UUID,
+        BLECharacteristic::PROPERTY_READ |
+        BLECharacteristic::PROPERTY_WRITE |
+        BLECharacteristic::PROPERTY_NOTIFY
+    );
+
     // Définir la valeur initiale de la caractéristique comme une chaîne vide
     midiCharacteristic->setValue(midi_message.c_str());
     colorCharacteristic->setValue(color_order.c_str());
@@ -98,6 +119,7 @@ void BLE_Midi::initBLE()
     pServer->setCallbacks(new MyServerCallbacks());
     midiCharacteristic->setCallbacks(new MidiCharacteristicCallbacks());
     colorCharacteristic->setCallbacks(new ColorCharacteristicCallbacks());
+    genericCharacteristic->setCallbacks(new GenericCharacteristicCallbacks());
 
     // Démarrer le service
     pService->start();    
@@ -108,8 +130,9 @@ void BLE_Midi::initBLE()
     Serial.println("BLE Server started, waiting for connections...");
 }
 
-uint8_t* BLE_Midi::getColorOrder(){
-    uint8_t array_color[3] = {red, green, blue};
-    //static
-    return array_color;
-}
+// uint8_t* BLE_Midi::getColorOrder(){
+//     uint8_t array_color[3] = {red, green, blue};
+//     //static
+//     return array_color;
+// }
+

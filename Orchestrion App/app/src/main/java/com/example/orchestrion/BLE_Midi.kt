@@ -23,13 +23,13 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import java.util.UUID
 
-class BleManager() :Parcelable{
+class BleManager() : Parcelable {
 
     var someProperty: String = ""
-    private lateinit var context:Context
+    private lateinit var context: Context
 
     constructor(_context: Context) : this() {
-          context = _context
+        context = _context
     }
 
     val requiredPermissions = arrayOf(
@@ -44,6 +44,7 @@ class BleManager() :Parcelable{
     private var bluetoothGatt: BluetoothGatt? = null
     private var midiWriteCharacteristic: BluetoothGattCharacteristic? = null
     private var colorWriteCharacteristic: BluetoothGattCharacteristic? = null
+    private var genericWriteCharacteristic: BluetoothGattCharacteristic? = null
     private var scanning = false
     private val handler = Handler()
     private val SCAN_PERIOD: Long = 10000 // 10 secondes
@@ -117,12 +118,17 @@ class BleManager() :Parcelable{
 
                 Log.d("BLE", "Services découverts")
                 val serviceUUID = UUID.fromString("03B80E5A-EDE8-4B33-A751-6CE34EC4C700")
-                val midiCharacteristicUUID = UUID.fromString("7772E5DB-3868-4112-A1A9-F2669D106BF3")
-                val colorCharacteristicUUID = UUID.fromString("12345678-1234-5678-1234-56789ABCDEF0")
+                val midiCharacteristicUUID =
+                    UUID.fromString("7772E5DB-3868-4112-A1A9-F2669D106BF3")
+                val colorCharacteristicUUID =
+                    UUID.fromString("12345678-1234-5678-1234-56789ABCDEF0")
+                val genericCharacteristicUUID =
+                    UUID.fromString("12345678-5678-9012-3456-56789ABCDEF0")
 
                 val service = gatt.getService(serviceUUID)
                 midiWriteCharacteristic = service?.getCharacteristic(midiCharacteristicUUID)
                 colorWriteCharacteristic = service?.getCharacteristic(colorCharacteristicUUID)
+                genericWriteCharacteristic = service?.getCharacteristic(genericCharacteristicUUID)
 
                 if (midiWriteCharacteristic != null) {
                     Log.d("BLE", "Caractéristique midi trouvée, prête à écrire")
@@ -135,10 +141,15 @@ class BleManager() :Parcelable{
                 } else {
                     Log.e("BLE", "Caractéristique couleur non trouvée")
                 }
+
+                if (genericWriteCharacteristic != null) {
+                    Log.d("BLE", "Caractéristique generic trouvée, prête à écrire")
+                } else {
+                    Log.e("BLE", "Caractéristique generic non trouvée")
+                }
             }
         }
     }
-
 
 
     @SuppressLint("MissingPermission")
@@ -146,7 +157,7 @@ class BleManager() :Parcelable{
         return bluetoothGatt?.device?.name.equals("ESP32 BLE Instrument")
     }
 
-    fun reconnectToESP32(){
+    fun reconnectToESP32() {
         if (!isBluetoothEnabled()) {
             Toast.makeText(context, "Bluetooth non activé", Toast.LENGTH_SHORT).show()
             return
@@ -155,7 +166,7 @@ class BleManager() :Parcelable{
 
         if (isOrchestrionConnected()) {
             Toast.makeText(context, "Déjà connecté", Toast.LENGTH_SHORT).show()
-        }else{
+        } else {
             Toast.makeText(context, "Tentative de Reconnexion", Toast.LENGTH_SHORT).show()
             stopScan()
             startScan()
@@ -220,6 +231,22 @@ class BleManager() :Parcelable{
         Log.d("BLE", "Message envoyé: $Red,\t $green, \t $blue, \t $animation")
     }
 
+    @SuppressLint("MissingPermission")
+    fun sendGenericOrder(content1: Int, content2: Int, content3: Int, content4: Int) {
+
+        val Content1 = content1.toByte() //Rouge
+        val Content2 = content2.toByte() //Vert
+        val Content3 = content3.toByte() //Blue
+        val Content4 = content4.toByte() //Blue
+
+        val colorPacket = byteArrayOf(0x00.toByte(), Content1, Content2, Content3, Content4)
+        colorWriteCharacteristic?.value = colorPacket
+
+        bluetoothGatt?.writeCharacteristic(genericWriteCharacteristic)
+
+        Log.d("BLE", "Message envoyé: $Content1,\t $Content2, \t $Content3, \t $Content4")
+    }
+
     // Constructeur pour Parcelable
     constructor(parcel: Parcel) : this() {
         someProperty = parcel.readString() ?: ""
@@ -232,7 +259,6 @@ class BleManager() :Parcelable{
     override fun describeContents(): Int {
         return 0
     }
-
 
 
     companion object CREATOR : Parcelable.Creator<BleManager> {

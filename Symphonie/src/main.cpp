@@ -1,63 +1,135 @@
 #include <Arduino.h>
-#include <BLE_Midi.h>
-#include <Keypad.h>
-#include <Animation_Neopix.h>
-
-#define  ROWS  5 // 5 lignes
-#define  COLS  5 // 5 colonnes
-#define LED_PIN 10
+#include <main.h>
 
 
 uint32_t maintenant_debug = 0;
 
-// byte rowPins[ROWS] = {13, 12, 14, 27, 26}; // Lignes
-// byte colPins[COLS] = {25, 33, 32, 34, 34};  // Colonnes
-
-
-// String keys[ROWS][COLS] = {
-//   {"C#", "C#1", "D1", "D#1", "E1"},  //Premiere octave [C;B]
-//   {"F1","F#1", "G1", "G#1", "A1"},
-//   { "A#1","B1", "C", "C#", "D"}, 
-//   { "D#", "E", "F", "F#", "G"},
-//   { "G#", "A", "A#", "B", ""}
-// };
-
-// Keypad keypad = Keypad(makeKeymap(keys), rowPins, colPins, ROWS, COLS);
-Adafruit_NeoPixel strip(NUMPIXELS, LED_PIN, NEO_GRB + NEO_KHZ800);
+Keypad keypad = Keypad(makeKeymap(keys), rowPins, colPins, ROWS, COLS);
+Adafruit_NeoPixel strip(NUMPIXELS, NEOPIX_PIN, NEO_GRB + NEO_KHZ800);
 Animation_Neopix anim;
-BLE_Midi ble_midi(anim);
-
-void keypadEvent(KeypadEvent key);
+BLE_Midi ble_midi;
+Oscil <SIN4096_NUM_CELLS, MOZZI_AUDIO_RATE> aSin1(SIN4096_DATA);
+Oscil <SIN4096_NUM_CELLS, MOZZI_AUDIO_RATE> aSin2(SIN4096_DATA);
+Oscil <SIN4096_NUM_CELLS, MOZZI_AUDIO_RATE> aSin3(SIN4096_DATA);
 
 void setup() {
   Serial.begin(115200);
   ble_midi.initBLE();
-  // keypad.addEventListener(keypadEvent);
-  
-  // for (int i = 0; i < COLS; i++) { // Essaie sans
-  //   pinMode(colPins[i], INPUT_PULLUP);
-  // }
+
   maintenant_debug = millis();
+  startMozzi();
+  aSin1.setFreq(1000.f); 
+  aSin2.setFreq(1000.f); 
+  aSin3.setFreq(1000.f); 
+  strip.begin();
+  strip.setBrightness(255);
 }
 
 void loop() {
-  // put your main code here, to run repeatedly:
-    // char key = keypad.getKey();
-    
 
+  // for(int i=0; i<20; i++) {
+  //   strip.setPixelColor(i, strip.Color(255, 255, 255));
+
+  //   strip.show();
+
+  //   delay(30);
+  // }
+  // strip.clear();
+  // strip.show();
+
+  if (keypad.getKeys())
+  {
+      for (int i=0; i<LIST_MAX; i++)   // Scan the whole key list.
+      {
+          if ( keypad.key[i].stateChanged )   // Only find keys that have changed state.
+          {
+              switch (keypad.key[i].kstate) {  // Report active key state : IDLE, PRESSED, HOLD, or RELEASED
+                  case PRESSED:
+                    state = " PRESSED.";
+                    break;
+                  case HOLD:
+                    state = " HOLD.";
+                    add2pressed_key(keypad.key[i].kcode); 
+                    Serial.printf("Tableau = %d ,\t %d ,\t %d \n", key_pressed[0], key_pressed[1], key_pressed[2]);
+                    break;
+                  case RELEASED:
+                    state = " RELEASED.";
+                    remove_from_pressed_key(keypad.key[i].kcode);
+                    Serial.printf("Tableau = %d ,\t %d ,\t %d \n", key_pressed[0], key_pressed[1], key_pressed[2]);
+                    break;
+                  case IDLE:
+                    state = " IDLE.";
+                    break;
+              }
+              Serial.print(keypad.key[i].kchar);
+              Serial.println(state);
+          }
+      }
+  }
+  audioHook();
 }
 
-// void keypadEvent(KeypadEvent key){
-//     switch (keypad.getState()){
-//     case PRESSED:
-//         Serial.println("Key pressed" + key);
-//         break;
 
-//     case RELEASED:
-//         Serial.println("Key released" + key);
-//         break;
+void updateControl(){
+  if(key_pressed[0]!=9999)
+    aSin1.setFreq(frequencies[key_pressed[0]]);
+  else
+    aSin1.setFreq(0);
 
-//     case HOLD:
-//         break;
-//     }
-// }
+  if(key_pressed[1]!=9999)
+    aSin2.setFreq(frequencies[key_pressed[1]]);
+  else
+    aSin2.setFreq(0);
+
+  if(key_pressed[2]!=9999)
+    aSin3.setFreq(frequencies[key_pressed[2]]);
+  else
+    aSin3.setFreq(0);
+}
+
+int8_t myAudioOutput = 0;
+uint8_t number_of_signals = 0;
+AudioOutput updateAudio(){
+  myAudioOutput = 0;
+  number_of_signals = 0;
+  if(key_pressed[0]!=9999){
+    myAudioOutput = myAudioOutput + aSin1.next();
+    number_of_signals++;
+  }
+
+  if(key_pressed[1]!=9999){
+    myAudioOutput = myAudioOutput + aSin2.next();
+    number_of_signals++;
+  }
+
+  if(key_pressed[2]!=9999){
+    myAudioOutput = myAudioOutput + aSin3.next();
+    number_of_signals++;
+  }
+
+  myAudioOutput = constrain(myAudioOutput, -128, 127);
+
+
+  return MonoOutput::from8Bit(myAudioOutput + 128);
+}
+
+void add2pressed_key(uint8_t key){
+  for(int i = 0; i<3;i++){
+    if (key_pressed[i] == 9999)
+    {
+      key_pressed[i] = key;
+      break;
+    }
+  }
+}
+
+void remove_from_pressed_key(uint8_t key){
+  for(int i = 0; i<3;i++){
+    if (key_pressed[i] == key)
+    {
+      key_pressed[i] = 9999;
+      break;
+    }
+  }
+}
+
