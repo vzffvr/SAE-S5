@@ -4,6 +4,8 @@
 #include <Mozzi.h>
 #include <Oscil.h> // oscillator template
 #include <tables/sin4096_int8.h> // sine table for oscillator
+#include <tables/triangle_dist_cubed_2048_int8.h> // sine table for oscillator
+#include <tables/sin4096_int8.h> // sine table for oscillator
 
 #define MOZZI_CONTROL_RATE 128 // MAX1024 mais latence
 #define  ROWS  5 // 5 lignes

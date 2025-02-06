@@ -21,9 +21,17 @@ class MyServerCallbacks : public BLEServerCallbacks {
 class MidiCharacteristicCallbacks : public BLECharacteristicCallbacks {
     void onWrite(BLECharacteristic* pCharacteristic) override { //Android 2 ESP
         std::string value = pCharacteristic->getValue();
-            Serial.println("Donnée MIDI reçue : " );
-            Serial.println(value.c_str()); // Affiche la valeur reçueA
-            // Met à jour ta variable globale si besoin
+        const uint8_t* data = reinterpret_cast<const uint8_t*>(value.data()); // Convertis le tableau value.data dans en un uint8_t*
+        
+        if(value.length() == 4){
+            uint8_t channel = data[1];   
+            uint8_t note = data[2];  
+            uint8_t content3 = data[3]; 
+            uint8_t content4 = data[4]; 
+        }
+
+        Serial.println("Donnée MIDI reçue : " );
+        Serial.println(value.c_str());
     }
     void onRead(BLECharacteristic *pCharacteristic) override {//ESP 2 Android
         Serial.println("Donnée lue !");
@@ -50,6 +58,9 @@ class GenericCharacteristicCallbacks : public BLECharacteristicCallbacks {
         }
         
     }
+    void onRead(BLECharacteristic *pCharacteristic) override {//ESP 2 Android
+        Serial.println("Donnée lue !");
+    }
 };
 
 class ColorCharacteristicCallbacks : public BLECharacteristicCallbacks {
@@ -74,7 +85,11 @@ class ColorCharacteristicCallbacks : public BLECharacteristicCallbacks {
             Serial.println("Erreur : Taille des données incorrecte");
         }
     }
+    void onRead(BLECharacteristic *pCharacteristic) override {//ESP 2 Android
+        Serial.println("Donnée lue !");
+    }
 };
+
 
 void BLE_Midi::initBLE()
 {

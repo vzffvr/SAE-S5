@@ -89,6 +89,10 @@ class MainActivity : ComponentActivity() {
         } else {
             // Demander les permissions
             requestPermissionLauncher.launch(bleManager.requiredPermissions)
+            if(bleManager.hasPermissions()) {
+                bleManager.askBluetoothActivation(this)
+                bleManager.startScan()
+            }
         }
 
         setContent {
@@ -116,7 +120,7 @@ class MainActivity : ComponentActivity() {
                         ColorPicker(
                             viewModel = colorViewModel,
                             navController = navController,
-                            BLeManager = bleManager
+                            bleManager = bleManager
                         )
                     }
 //                    composable<ImgColorPicker> {
@@ -126,6 +130,7 @@ class MainActivity : ComponentActivity() {
 //                            myMQTT = mqttClientManager,
 //                        )
 //                    }
+
                     composable<ConfigScreen> {
                         ConfigScreen(
                             viewmodel = colorViewModel,
@@ -134,7 +139,10 @@ class MainActivity : ComponentActivity() {
                         )
                     }
                     composable<Piano> {
-                        PianoUI()
+                        PianoUI(
+                            bleManager = bleManager,
+                            viewModel = colorViewModel
+                        )
                     }
                     composable<TestFichier> {
                         FileOperationsScreen(LocalContext.current)

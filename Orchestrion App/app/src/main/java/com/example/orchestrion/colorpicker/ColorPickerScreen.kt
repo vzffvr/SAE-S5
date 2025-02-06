@@ -44,12 +44,12 @@ fun ColorPickerScreen() {
 
     val viewModel: ColorViewModel = viewModel()
 
-    ColorPicker(viewModel = viewModel, navController = null, BLeManager = null)
+    ColorPicker(viewModel = viewModel, navController = null, bleManager = null)
 }
 
 @Composable
 fun ColorPicker(
-    BLeManager: BleManager?,
+    bleManager: BleManager?,
     navController: NavController?, //PhotoPicker
     viewModel: ColorViewModel
 ) {
@@ -122,7 +122,7 @@ fun ColorPicker(
 
                     animation = viewModel.animation
 
-                    BLeManager?.sendColorOrder(red10, green10, blue10, animation)
+                    bleManager?.sendColorOrder(red10, green10, blue10, animation)
                 }
             )
 
@@ -152,7 +152,7 @@ fun ColorPicker(
 
 
 
-                SpinnerAnim(viewModel, BLeManager, options, "Animation")
+                SpinnerAnim(viewModel, bleManager, options, "Animation")
 
 
 //                    Button(

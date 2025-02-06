@@ -23,7 +23,7 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import java.util.UUID
 
-class BleManager() : Parcelable {
+class BleManager(){
 
     var someProperty: String = ""
     private lateinit var context: Context
@@ -239,36 +239,11 @@ class BleManager() : Parcelable {
         val Content3 = content3.toByte() //Blue
         val Content4 = content4.toByte() //Blue
 
-        val colorPacket = byteArrayOf(0x00.toByte(), Content1, Content2, Content3, Content4)
-        colorWriteCharacteristic?.value = colorPacket
+        val genericPacket = byteArrayOf(0x00.toByte(), Content1, Content2, Content3, Content4)
+        genericWriteCharacteristic?.value = genericPacket
 
         bluetoothGatt?.writeCharacteristic(genericWriteCharacteristic)
 
         Log.d("BLE", "Message envoyé: $Content1,\t $Content2, \t $Content3, \t $Content4")
     }
-
-    // Constructeur pour Parcelable
-    constructor(parcel: Parcel) : this() {
-        someProperty = parcel.readString() ?: ""
-    }
-
-    override fun writeToParcel(parcel: Parcel, flags: Int) {
-        // Écrivez les données nécessaires dans le Parcel
-    }
-
-    override fun describeContents(): Int {
-        return 0
-    }
-
-
-    companion object CREATOR : Parcelable.Creator<BleManager> {
-        override fun createFromParcel(parcel: Parcel): BleManager {
-            return BleManager(parcel)
-        }
-
-        override fun newArray(size: Int): Array<BleManager?> {
-            return arrayOfNulls(size)
-        }
-    }
-
 }

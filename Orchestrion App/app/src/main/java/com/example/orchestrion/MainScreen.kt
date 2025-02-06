@@ -67,6 +67,7 @@ fun MainScreen(
     var textcolor = Color.Black
     var buttonborder = BorderStroke(2.dp, Color.Black)
     var logo = R.drawable.symphonie_branding_light
+    val options = listOf("Sinusoidale", "Carre", "Triangulaire")
 
 
     if (isSystemInDarkTheme()) {
@@ -144,18 +145,18 @@ fun MainScreen(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-
-                val context = LocalContext.current
                 Button(
                     shape = ShapeDefaults.ExtraLarge,
                     border = buttonborder,
                     colors = buttonColor,
-                    modifier = buttonModifier,
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxHeight(0.28125f)
+                        .fillMaxWidth()
+                        .fillMaxHeight(0.28125f)
+                        .padding(16.dp),
                     onClick = {
-                        val intent = Intent(context, PianoActivity::class.java)
-                        intent.putExtra("bleManager", bleManager)
-                        context.startActivity(intent)
-//                        context.startActivity(Intent(context, PianoActivity::class.java))
+                        navController?.navigate(Piano)
                     }
                 ) {
                     Text(
@@ -165,13 +166,17 @@ fun MainScreen(
                     )
                 }
 
+/*
                 Button(
                     shape = ShapeDefaults.ExtraLarge,
                     border = buttonborder,
                     colors = buttonColor,
-                    modifier = buttonModifier,
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxWidth()
+                        .fillMaxHeight(0.28125f)
+                        .padding(16.dp),
                     onClick = {
-                        bleManager?.startScan()
                         navController?.navigate(ConfigScreen)
                     }) {
                     Text(
@@ -180,12 +185,18 @@ fun MainScreen(
                         fontSize = 20.sp
                     )
                 }
+*/
 
                 Button(
                     shape = ShapeDefaults.ExtraLarge,
                     border = buttonborder,
                     colors = buttonColor,
-                    modifier = buttonModifier,
+                    modifier = Modifier
+                        .weight(1f)
+
+                        .fillMaxWidth()
+                        .fillMaxHeight(0.28125f)
+                        .padding(16.dp),
                     onClick = {
                         navController?.navigate(Colorpicker)
                     }) {
@@ -196,20 +207,7 @@ fun MainScreen(
                     )
                 }
 
-                Button(
-                    shape = ShapeDefaults.ExtraLarge,
-                    border = buttonborder,
-                    colors = buttonColor,
-                    modifier = buttonModifier,
-                    onClick = {
-                        navController?.navigate(Piano)
-                    }) {
-                    Text(
-                        text = "Piano Compose",
-                        color = textcolor,
-                        fontSize = 20.sp
-                    )
-                }
+                SpinnerAnim(viewModel = viewmodel, bleManager = bleManager, options, "Forme du signal")
 
                 Row(
                     modifier = Modifier

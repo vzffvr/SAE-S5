@@ -63,7 +63,7 @@ fun SpinnerAnim(
     viewModel: ColorViewModel,
     bleManager: BleManager?,
     options: List<String>,
-    titre: String?,
+    titre: String?
 ) {
 
     var expanded by remember { mutableStateOf(false) }
@@ -115,7 +115,7 @@ fun SpinnerAnim(
                             options.indexOf(option) + 1
                         )
                     },
-                    contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding,
+                    contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding, 
                 )
             }
         }
@@ -129,12 +129,14 @@ fun SpinnerConfig(
     bleManager: BleManager?,
     options: List<String>,
     titre: String?,
+    modifier: Modifier
 ) {
 
     var expanded by remember { mutableStateOf(false) }
     var text by remember { mutableStateOf(options[0]) }
 
     ExposedDropdownMenuBox(
+        modifier = modifier,
         expanded = expanded,
         onExpandedChange = { expanded = it },
     ) {

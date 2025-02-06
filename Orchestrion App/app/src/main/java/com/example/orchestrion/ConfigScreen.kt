@@ -138,7 +138,7 @@ fun ConfigScreen(
 
                 Spacer(modifier = Modifier.height(30.dp))
 
-                SpinnerConfig(viewmodel, BLeManager, options, "Forme du signal")
+                SpinnerConfig(viewmodel, BLeManager, options, "Forme du signal", modifier = Modifier.weight(1f))
 
                 Spacer(modifier = Modifier.height(30.dp))
 
