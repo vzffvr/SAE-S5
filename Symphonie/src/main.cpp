@@ -1,8 +1,9 @@
 #include <Arduino.h>
 #include <main.h>
 
+NEW_MSG new_data[3] {No_New_Msg};
 
-uint32_t maintenant_debug = 0;
+uint8_t signal_form = 0;
 
 Keypad keypad = Keypad(makeKeymap(keys), rowPins, colPins, ROWS, COLS);
 Adafruit_NeoPixel strip(NUMPIXELS, NEOPIX_PIN, NEO_GRB + NEO_KHZ800);
@@ -16,7 +17,6 @@ void setup() {
   Serial.begin(115200);
   ble_midi.initBLE();
 
-  maintenant_debug = millis();
   startMozzi();
   aSin1.setFreq(1000.f); 
   aSin2.setFreq(1000.f); 
@@ -36,6 +36,31 @@ void loop() {
   // }
   // strip.clear();
   // strip.show();
+  
+  
+  memcpy(new_data, ble_midi.loopBLE(), sizeof(new_data)); // Copie des valeurs de Whats_New qui est dans loopBLE dans new_data
+
+  for(int i=0; i <sizeof(new_data) / sizeof(new_data[0]); i++){ // Division car sizeof retourne des octect
+    switch (new_data[i])
+    {
+      case Color:
+        Serial.println("Maj Color");
+        anim.setStripColor(ble_midi.getColorOrder());
+        break;
+      case MIDI:
+        Serial.println("Maj Midi");
+        // anim.setStripColor(ble_midi.getColorOrder());
+        break;
+      case Generic:
+        Serial.println("Maj generic"); 
+        // anim.setStripColor(ble_midi.getColorOrder());
+        break;
+      
+      default:
+        break;
+    }
+    ble_midi.reset_tab();
+  }
 
   if (keypad.getKeys())
   {

@@ -20,6 +20,11 @@ Animation_Neopix::Animation_Neopix(void){
 
     milieu1 = (NUMPIXELS/2);
     milieu2 = (NUMPIXELS/2) -1;
+
+    red = 0;
+    green = 0;
+    blue = 0;
+    animation = 0;
 }
 
 //méthodes 
@@ -199,4 +204,11 @@ void Animation_Neopix::doubleCWext(uint8_t pixel, bool reverse,  Adafruit_NeoPix
         strip->setPixelColor(NUMPIXELS - pixel, strip->Color(0, 0, 0));
         strip->setPixelColor( pixel, strip->Color(0, 0, 0));
     }
+}
+
+void Animation_Neopix::setStripColor(uint8_t tab[]){
+    red = tab[0];
+    green = tab[1];
+    blue = tab[2];
+    animation = tab[3];
 }

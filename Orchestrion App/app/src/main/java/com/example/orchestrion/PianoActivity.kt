@@ -12,13 +12,10 @@ import android.view.View
 import android.widget.Button
 import android.widget.HorizontalScrollView
 import android.widget.SeekBar
-import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
 
 class PianoActivity : AppCompatActivity() {
-
+    //7 blanches 5 noires
     private val whiteKeyIds = arrayOf(
         R.id.keyA1, R.id.keyB1, R.id.keyC1, R.id.keyD1, R.id.keyE1, R.id.keyF1, R.id.keyG1,
         R.id.keyA2, R.id.keyB2, R.id.keyC2, R.id.keyD2, R.id.keyE2, R.id.keyF2, R.id.keyG2,
@@ -44,10 +41,6 @@ class PianoActivity : AppCompatActivity() {
                 or View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY)
         setContentView(R.layout.activity_piano)
 
-
-
-//        val bleManager = intent.getParcelableExtra<BleManager>("bleManager")
-//        bleManager?.initializeWithContext(this)
 
         val seekBar = findViewById<SeekBar>(R.id.seekBar)
         val scrollView = findViewById<HorizontalScrollView>(R.id.scrollView)
@@ -87,6 +80,7 @@ class PianoActivity : AppCompatActivity() {
                             }, 100)
                             true
                         }
+
                         MotionEvent.ACTION_UP -> {
 //                                if(bleManager?.isOrchestrionConnected() == true)
 //                                    bleManager.sendMidiMessage(0x91 , index+100, 0x00)
@@ -94,6 +88,7 @@ class PianoActivity : AppCompatActivity() {
 //                                    Log.d("BLE", bleManager?.isOrchestrionConnected().toString())
                             true
                         }
+
                         else -> false // Pour les autres événements, retourne false
                     }
                 }
@@ -117,6 +112,7 @@ class PianoActivity : AppCompatActivity() {
                             }, 100)
                             true
                         }
+
                         MotionEvent.ACTION_UP -> {
 //                                if(bleManager?.isOrchestrionConnected() == true)
 //                                    bleManager.sendMidiMessage(0x91, index+100, 0x00)
@@ -125,6 +121,7 @@ class PianoActivity : AppCompatActivity() {
 
                             true
                         }
+
                         else -> false // Pour les autres événements, retourne false
                     }
                 }

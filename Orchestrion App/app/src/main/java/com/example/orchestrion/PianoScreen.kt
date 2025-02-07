@@ -55,14 +55,13 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 
-
-@Preview(device = "spec:width=600dp,height=891dp")
-@Composable
-fun PreviewPiano(){
-    PianoUI(
-        viewModel = ColorViewModel()
-    )
-}
+//@Preview(device = "spec:width=600dp,height=891dp")
+//@Composable
+//fun PreviewPiano() {
+//    PianoUI(
+//        viewModel = ColorViewModel()
+//    )
+//}
 
 @Composable
 fun PianoUI(bleManager: BleManager? = null, viewModel: ColorViewModel) {
@@ -86,16 +85,15 @@ fun PianoUI(bleManager: BleManager? = null, viewModel: ColorViewModel) {
                         .align(Alignment.BottomCenter)
                 ) {
                     repeat(14) { // 14 touches blanches pour une octave
-                            WhiteKey(
-                                color = viewModel.getTC(),
-                                onPress = {
-                                    bleManager?.sendMidiMessage(1, it, 127)
-                                },
-                                onRelease = {
-                                    bleManager?.sendMidiMessage(1, it, 0)
-                                }
-                            )
-
+                        WhiteKey(
+                            color = viewModel.getTC(),
+                            onPress = {
+                                bleManager?.sendMidiMessage(1, it, 127)
+                            },
+                            onRelease = {
+                                bleManager?.sendMidiMessage(1, it, 0)
+                            }
+                        )
                     }
                 }
                 Row(
@@ -106,15 +104,15 @@ fun PianoUI(bleManager: BleManager? = null, viewModel: ColorViewModel) {
                 ) {
                     repeat(14) { index ->
                         if (index % 7 != 2 && index % 7 != 6) { // Position des touches noires
-                                BlackKey(
-                                    color = viewModel.getTC(),
-                                    onPress =  {
-                                        bleManager?.sendMidiMessage(1, index, 127)
-                                    },
-                                    onRelease = {
-                                        bleManager?.sendMidiMessage(1, index, 0)
-                                    }
-                                )
+                            BlackKey(
+                                color = viewModel.getTC(),
+                                onPress = {
+                                    bleManager?.sendMidiMessage(1, index, 127)
+                                },
+                                onRelease = {
+                                    bleManager?.sendMidiMessage(1, index, 0)
+                                }
+                            )
 
                         } else {
                             Spacer(modifier = Modifier.width(20.dp)) // Espace pour les touches blanches
@@ -124,6 +122,51 @@ fun PianoUI(bleManager: BleManager? = null, viewModel: ColorViewModel) {
             }
         })
     }
+}
+
+@Composable
+fun PianoKeyboard(octaves: Int) {
+    val whiteKeysPattern = listOf(true, false, true, true, false, true, false, true, true, false, true, false)
+    val blackKeysPattern = listOf(false, true, false, false, true, false, true, false, false, true, false, true)
+
+    Column(
+        modifier = Modifier.fillMaxSize(),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Box {
+            // Dessiner les touches blanches
+            Row {
+                repeat(octaves) { octave ->
+                    for (note in 0 until 12) {
+                        if (whiteKeysPattern[note]) {
+                            WhiteKey()
+                        }
+                    }
+                }
+            }
+
+            // Dessiner les touches noires
+            Row(modifier = Modifier.padding(top = 50.dp)) {
+                repeat(octaves) { octave ->
+                    for (note in 0 until 12) {
+                        if (blackKeysPattern[note]) {
+                            BlackKey()
+                        } else {
+                            // Espacement pour aligner les touches noires
+                            Spacer(modifier = Modifier.width(30.dp))
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+
+@Preview(device = "spec:width=1200dp,height=891dp")
+@Composable
+fun PreviewPiano() {
+    PianoKeyboard(octaves = 1) // Aperçu avec 2 octaves
 }
 
 
@@ -141,7 +184,7 @@ fun WhiteKey(
     val coroutineScope = rememberCoroutineScope()
 
     Button(
-        onClick = {/*Pas besoin mais obligatoire*/},
+        onClick = {/*Pas besoin mais obligatoire*/ },
         modifier = Modifier
             .width(74.dp)               // Largeur fixe à 74dp
             .fillMaxHeight()            // Hauteur égale à celle du parent (match_parent)
@@ -158,10 +201,12 @@ fun WhiteKey(
                         onPress()
                         true
                     }
+
                     MotionEvent.ACTION_MOVE -> {
                         backgroundColor = Color.White
                         true
                     }
+
                     MotionEvent.ACTION_UP -> {
                         backgroundColor = Color.White
                         onRelease()
@@ -221,11 +266,13 @@ fun BlackKey(
                         onPress()
                         true
                     }
+
                     MotionEvent.ACTION_MOVE -> {
                         backgroundColor = Color.Black
                         onRelease()
                         true
                     }
+
                     MotionEvent.ACTION_UP -> {
                         backgroundColor = Color.Black
                         onRelease()

@@ -1,7 +1,5 @@
 package com.example.orchestrion
 
-import android.content.Intent
-import android.content.pm.ActivityInfo
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
@@ -30,7 +28,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.paint
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -166,26 +163,26 @@ fun MainScreen(
                     )
                 }
 
-/*
-                Button(
-                    shape = ShapeDefaults.ExtraLarge,
-                    border = buttonborder,
-                    colors = buttonColor,
-                    modifier = Modifier
-                        .weight(1f)
-                        .fillMaxWidth()
-                        .fillMaxHeight(0.28125f)
-                        .padding(16.dp),
-                    onClick = {
-                        navController?.navigate(ConfigScreen)
-                    }) {
-                    Text(
-                        text = "Config",
-                        color = textcolor,
-                        fontSize = 20.sp
-                    )
-                }
-*/
+                /*
+                                Button(
+                                    shape = ShapeDefaults.ExtraLarge,
+                                    border = buttonborder,
+                                    colors = buttonColor,
+                                    modifier = Modifier
+                                        .weight(1f)
+                                        .fillMaxWidth()
+                                        .fillMaxHeight(0.28125f)
+                                        .padding(16.dp),
+                                    onClick = {
+                                        navController?.navigate(ConfigScreen)
+                                    }) {
+                                    Text(
+                                        text = "Config",
+                                        color = textcolor,
+                                        fontSize = 20.sp
+                                    )
+                                }
+                */
 
                 Button(
                     shape = ShapeDefaults.ExtraLarge,
@@ -207,7 +204,13 @@ fun MainScreen(
                     )
                 }
 
-                SpinnerAnim(viewModel = viewmodel, bleManager = bleManager, options, "Forme du signal")
+                SpinnerConfig(
+                    viewModel = viewmodel,
+                    bleManager = bleManager,
+                    options,
+                    titre = "Forme du signal",
+                    modifier = Modifier.weight(1f)
+                )
 
                 Row(
                     modifier = Modifier

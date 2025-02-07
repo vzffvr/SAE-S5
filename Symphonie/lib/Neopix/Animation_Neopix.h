@@ -10,6 +10,7 @@ class Animation_Neopix{
     uint8_t red;
     uint8_t green;
     uint8_t blue;
+    uint8_t animation;
 
     public:
     uint8_t rotation;
@@ -43,7 +44,7 @@ class Animation_Neopix{
     void Trainee(uint32_t color, uint16_t tempo, Adafruit_NeoPixel *strip);
     void Scintillement(uint32_t color, uint16_t tempo, Adafruit_NeoPixel *strip);
 
-    void setStripColor(uint8_t red, uint8_t green, uint8_t blue, uint8_t anim);
+    void setStripColor(uint8_t tab[]);
 };
 
 #endif
