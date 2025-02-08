@@ -75,7 +75,7 @@ fun PianoUI(bleManager: BleManager? = null, viewModel: ColorViewModel) {
 
     val notes = mutableListOf("C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B", "C2", "C2#", "D2", "D2#", "E2", "F2", "F2#", "G2", "G2#", "A2", "A2#", "B2")
 
-    
+
     Column(
         modifier = Modifier
             .fillMaxWidth(),
@@ -153,11 +153,10 @@ fun string2Midi(note: String): Int? {
     if (match != null) {
         var octave = 1
         val (notePart, octavePart, sharpPart) = match.destructured
-        if(octavePart.isEmpty())
-            octave = 1
+        octave = if(octavePart.isEmpty())
+            1
         else
-            octave = octavePart.toInt()
-
+            octavePart.toInt()
 
         return noteMap[notePart]?.let{it + octave * 12 + if (sharpPart.isNotEmpty()) 1 else 0}
 

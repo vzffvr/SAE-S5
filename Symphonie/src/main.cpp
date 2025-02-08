@@ -6,7 +6,6 @@ NEW_MSG new_data[3] {No_New_Msg};
 uint8_t signal_form = 0;
 
 Keypad keypad = Keypad(makeKeymap(keys), rowPins, colPins, ROWS, COLS);
-Adafruit_NeoPixel strip(NUMPIXELS, NEOPIX_PIN, NEO_GRB + NEO_KHZ800);
 Animation_Neopix anim;
 BLE_Midi ble_midi;
 Oscil <SIN4096_NUM_CELLS, MOZZI_AUDIO_RATE> aSin1(SIN4096_DATA);
@@ -21,8 +20,6 @@ void setup() {
   aSin1.setFreq(1000.f); 
   aSin2.setFreq(1000.f); 
   aSin3.setFreq(1000.f); 
-  strip.begin();
-  strip.setBrightness(255);
 }
 
 void loop() {
@@ -37,6 +34,9 @@ void loop() {
   // strip.clear();
   // strip.show();
 
+  new_data[0] = ble_midi.loopBLE()[0];
+  new_data[1] = ble_midi.loopBLE()[1];
+  new_data[2] = ble_midi.loopBLE()[2];
   
   memcpy(new_data, ble_midi.loopBLE(), sizeof(new_data)); // Copie des valeurs de Whats_New qui est dans loopBLE dans new_data
   ble_midi.reset_tab();
@@ -52,7 +52,7 @@ void loop() {
         break;
       case MIDI:
         Serial.println("Maj Midi");
-        //Traitement: Ajout ou retrait de la touche recu du tableau de touches appuyer.
+        //Traitement: Ajout ou retrait de la touche recu du tableau de touches appuye.
         // status = 0x9x -> ajout 
         // status = 0x8x -> retrait 
         break;

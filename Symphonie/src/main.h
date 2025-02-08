@@ -10,7 +10,6 @@
 #define MOZZI_CONTROL_RATE 128 // MAX1024 mais latence
 #define  ROWS  5 // 5 lignes
 #define  COLS  5 // 5 colonnes
-#define NEOPIX_PIN 23
 #define NUM_FREQUENCIES 24
 
 

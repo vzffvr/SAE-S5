@@ -124,7 +124,8 @@ class ColorCharacteristicCallbacks : public BLECharacteristicCallbacks {
             std::string value = pCharacteristic->getValue();
             const uint8_t* data = reinterpret_cast<const uint8_t*>(value.data()); // Convertis le tableau value.data dans en un uint8_t*
             size_t length = value.length();
-
+            // reinterpret_cast change la type d'interpretation en memoire
+            // data pointe simplement l'adresse
             if (length == 5 && (data[0] == 0xFF)) {
                 
                 red = data[1];    
