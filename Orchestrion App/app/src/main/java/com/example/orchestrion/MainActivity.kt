@@ -1,6 +1,7 @@
 package com.example.orchestrion
 
 import android.animation.ObjectAnimator
+import android.app.Activity
 import android.os.Bundle
 import android.util.Log
 import android.view.View
@@ -77,7 +78,8 @@ class MainActivity : ComponentActivity() {
                 // Toutes les permissions sont accordées
                 bleManager.startScan()
             } else {
-                // Afficher un message d'erreur si les permissions ne sont pas accordées
+                val activity = (this as? Activity)
+                activity?.finish()
                 Log.e("BLE", "Permissions refusées")
             }
         }
@@ -87,7 +89,6 @@ class MainActivity : ComponentActivity() {
             bleManager.askBluetoothActivation(this)
             bleManager.startScan()
         } else {
-            // Demander les permissions
             requestPermissionLauncher.launch(bleManager.requiredPermissions)
             if(bleManager.hasPermissions()) {
                 bleManager.askBluetoothActivation(this)

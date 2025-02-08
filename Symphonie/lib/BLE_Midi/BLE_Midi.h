@@ -2,6 +2,8 @@
 #define BLE_MIDI
 
 #include <Arduino.h>
+#include <BLEUtils.h>
+#include <BLEServer.h>
 #include <Animation_Neopix.h>
 #include <Callbacks.h>
 
@@ -24,22 +26,18 @@ enum NEW_MSG{
 class BLE_Midi
 {
 private:
+
     MyServerCallbacks ServerCallback;
     ColorCharacteristicCallbacks ColorCallBack;
     MidiCharacteristicCallbacks MidiCallBack;
     GenericCharacteristicCallbacks GenericCallBack;
 
-    uint8_t red;
-    uint8_t green;
-    uint8_t blue;
-    uint8_t animation;
     uint32_t maintenant_loop;
     NEW_MSG WhatsNew[3] = {No_New_Msg};
 
 public:
     BLE_Midi(); // Déclaration du constructeur
     void initBLE();
-    
     NEW_MSG* loopBLE();
     
     uint8_t* getColorOrder();

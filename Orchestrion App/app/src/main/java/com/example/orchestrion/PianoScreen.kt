@@ -1,8 +1,11 @@
 package com.example.orchestrion
 
+import android.content.Context
+import android.content.res.Configuration
 import android.graphics.drawable.BitmapDrawable
 import android.util.Log
 import android.view.MotionEvent
+import android.view.OrientationEventListener
 import androidx.compose.foundation.background
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
@@ -25,6 +28,7 @@ import androidx.compose.material3.Slider
 import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -44,7 +48,9 @@ import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.input.pointer.pointerInteropFilter
 import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.IntSize
@@ -53,18 +59,23 @@ import androidx.core.content.ContextCompat
 import com.example.orchestrion.colorpicker.ColorViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.serialization.json.Json.Default.configuration
 
 
-//@Preview(device = "spec:width=600dp,height=891dp")
-//@Composable
-//fun PreviewPiano() {
-//    PianoUI(
-//        viewModel = ColorViewModel()
-//    )
-//}
+@Preview(device = "spec:width=1600dp,height=891dp")
+@Composable
+fun PreviewPiano() {
+    PianoUI(
+        viewModel = ColorViewModel()
+    )
+}
 
 @Composable
 fun PianoUI(bleManager: BleManager? = null, viewModel: ColorViewModel) {
+
+    val notes = mutableListOf("C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B", "C2", "C2#", "D2", "D2#", "E2", "F2", "F2#", "G2", "G2#", "A2", "A2#", "B2")
+
+    
     Column(
         modifier = Modifier
             .fillMaxWidth(),
@@ -84,38 +95,45 @@ fun PianoUI(bleManager: BleManager? = null, viewModel: ColorViewModel) {
                         .fillMaxSize()
                         .align(Alignment.BottomCenter)
                 ) {
-                    repeat(14) { // 14 touches blanches pour une octave
-                        WhiteKey(
-                            color = viewModel.getTC(),
-                            onPress = {
-                                bleManager?.sendMidiMessage(1, it, 127)
-                            },
-                            onRelease = {
-                                bleManager?.sendMidiMessage(1, it, 0)
-                            }
-                        )
+                    for (whiteNote in notes){
+                        if (!whiteNote.endsWith("#")) {
+                            Log.d("KeyButton", "whiteNote: $whiteNote")
+                            WhiteKey(
+                                text = whiteNote,
+                                color = viewModel.getTC(),
+                                onPress =
+                                { bleManager?.sendMidiMessage(1, string2Midi(whiteNote), 127, NoteON = true) },
+                                onRelease =
+                                { bleManager?.sendMidiMessage(1, string2Midi(whiteNote), 0, NoteON = false) }
+                            )
+                        }
                     }
                 }
+
+
                 Row(
                     modifier = Modifier
                         .fillMaxSize()
-                        .align(Alignment.BottomCenter)
                         .padding(bottom = 50.dp) // Décaler les touches noires vers le haut
                 ) {
-                    repeat(14) { index ->
-                        if (index % 7 != 2 && index % 7 != 6) { // Position des touches noires
+                    Spacer(Modifier.width(48.dp))
+                    //
+                    for (blackNote in notes){
+                        if (blackNote.endsWith("#")) { // Position des touches noires
+                            Log.d("KeyButton", "blackNote: $blackNote")
                             BlackKey(
+                                text = blackNote,
                                 color = viewModel.getTC(),
-                                onPress = {
-                                    bleManager?.sendMidiMessage(1, index, 127)
+                                onPress =
+                                { bleManager?.sendMidiMessage(1, string2Midi(blackNote), 127, NoteON = true)
                                 },
-                                onRelease = {
-                                    bleManager?.sendMidiMessage(1, index, 0)
-                                }
+                                onRelease =
+                                { bleManager?.sendMidiMessage(1, string2Midi(blackNote), 0, NoteON = false) }
                             )
-
-                        } else {
-                            Spacer(modifier = Modifier.width(20.dp)) // Espace pour les touches blanches
+                            if (blackNote.startsWith("D")||blackNote.startsWith("A") && !blackNote.startsWith("A2")) {
+                                Spacer(Modifier.width(96.dp))
+                            }else
+                                Spacer(Modifier.width(22.dp))
                         }
                     }
                 }
@@ -124,49 +142,27 @@ fun PianoUI(bleManager: BleManager? = null, viewModel: ColorViewModel) {
     }
 }
 
-@Composable
-fun PianoKeyboard(octaves: Int) {
-    val whiteKeysPattern = listOf(true, false, true, true, false, true, false, true, true, false, true, false)
-    val blackKeysPattern = listOf(false, true, false, false, true, false, true, false, false, true, false, true)
+fun string2Midi(note: String): Int? {
+    val noteMap = mapOf(
+        "C" to 0, "D" to 2, "E" to 4, "F" to 5, "G" to 7, "A" to 9, "B" to 11
+    )
 
-    Column(
-        modifier = Modifier.fillMaxSize(),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Box {
-            // Dessiner les touches blanches
-            Row {
-                repeat(octaves) { octave ->
-                    for (note in 0 until 12) {
-                        if (whiteKeysPattern[note]) {
-                            WhiteKey()
-                        }
-                    }
-                }
-            }
+    val regex = Regex("([A-G])(\\d+)?(#?)")
+    val match = regex.matchEntire(note)
 
-            // Dessiner les touches noires
-            Row(modifier = Modifier.padding(top = 50.dp)) {
-                repeat(octaves) { octave ->
-                    for (note in 0 until 12) {
-                        if (blackKeysPattern[note]) {
-                            BlackKey()
-                        } else {
-                            // Espacement pour aligner les touches noires
-                            Spacer(modifier = Modifier.width(30.dp))
-                        }
-                    }
-                }
-            }
-        }
-    }
-}
+    if (match != null) {
+        var octave = 1
+        val (notePart, octavePart, sharpPart) = match.destructured
+        if(octavePart.isEmpty())
+            octave = 1
+        else
+            octave = octavePart.toInt()
 
 
-@Preview(device = "spec:width=1200dp,height=891dp")
-@Composable
-fun PreviewPiano() {
-    PianoKeyboard(octaves = 1) // Aperçu avec 2 octaves
+        return noteMap[notePart]?.let{it + octave * 12 + if (sharpPart.isNotEmpty()) 1 else 0}
+
+    }else
+        return 99999
 }
 
 
@@ -174,7 +170,6 @@ fun PreviewPiano() {
 @Composable
 fun WhiteKey(
     text: String = "A1",
-    index: Int = 0,
     color: Color = Color.White,
     onPress: () -> Unit = {},
     onRelease: () -> Unit = {}
@@ -184,7 +179,7 @@ fun WhiteKey(
     val coroutineScope = rememberCoroutineScope()
 
     Button(
-        onClick = {/*Pas besoin mais obligatoire*/ },
+        onClick = {/*Pas besoin mais obligatoire*/},
         modifier = Modifier
             .width(74.dp)               // Largeur fixe à 74dp
             .fillMaxHeight()            // Hauteur égale à celle du parent (match_parent)
@@ -194,7 +189,7 @@ fun WhiteKey(
                 when (motionEvent.action) {
                     MotionEvent.ACTION_DOWN -> {
                         backgroundColor = color
-                        Log.d("KeyButton", "index: $index")
+                        Log.d("KeyButton", "WhiteKey: $text")
                         coroutineScope.launch {
                             delay(100)
                         }
@@ -238,7 +233,6 @@ fun WhiteKey(
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun BlackKey(
-    index: Int = 0,
     text: String = "C#",
     color: Color = Color.Black,
     onPress: () -> Unit = {},
@@ -258,7 +252,6 @@ fun BlackKey(
                     MotionEvent.ACTION_DOWN -> {
                         // À l'appui, on change la couleur de fond en #80ffe5 et on log l'index
                         backgroundColor = color
-                        println("SharpKeyButton index: $index pressed")
                         coroutineScope.launch {
                             delay(100)
 
@@ -315,6 +308,20 @@ fun CustomSeekBarWithScroll(content: @Composable () -> Unit = {}) {
 
     val coroutineScope = rememberCoroutineScope()
 
+    val configuration = LocalConfiguration.current
+    val orientation = configuration.orientation
+
+    val imageWidthPx = 1183f
+    val density = LocalDensity.current.density
+    val imageWidthDp = (imageWidthPx / density).dp
+
+    // Calculer la largeur du slider en fonction de l'orientation
+    val sliderWidth = if (orientation == Configuration.ORIENTATION_PORTRAIT) {
+        (imageWidthPx / density).dp
+    } else {
+        configuration.screenWidthDp.dp // En paysage, utiliser la largeur de l'écran
+    }
+
     // Après la composition, si les dimensions sont connues, on positionne le scroll à 50%
     LaunchedEffect(containerSize, contentSize) {
         if (contentSize.width > containerSize.width) {
@@ -359,7 +366,7 @@ fun CustomSeekBarWithScroll(content: @Composable () -> Unit = {}) {
                 },
                 valueRange = 0f..100f,
                 modifier = Modifier
-                    .fillMaxWidth()
+                    .width(500.dp)
                     .drawBehind {
                         // Dessiner l'image du track
                         val trackHeight = trackBitmap.height.toFloat()

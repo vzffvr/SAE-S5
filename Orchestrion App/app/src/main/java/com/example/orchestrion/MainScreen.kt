@@ -13,6 +13,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.ShapeDefaults
@@ -66,7 +68,6 @@ fun MainScreen(
     var logo = R.drawable.symphonie_branding_light
     val options = listOf("Sinusoidale", "Carre", "Triangulaire")
 
-
     if (isSystemInDarkTheme()) {
         logo = R.drawable.symphonie_branding_dark
         textcolor = Color.White
@@ -79,9 +80,9 @@ fun MainScreen(
 
 
     var connectedColor by remember { mutableStateOf(Color.Red) }
-    LaunchedEffect(bleManager?.isOrchestrionConnected()) {
+    LaunchedEffect(bleManager?.isSymphonieConnected()) {
         while (isActive) {
-            connectedColor = if (bleManager?.isOrchestrionConnected() == true) {
+            connectedColor = if (bleManager?.isSymphonieConnected() == true) {
                 Color.Green
             } else {
                 Color.Red
@@ -110,7 +111,8 @@ fun MainScreen(
 
 
         Column(
-            modifier = Modifier.fillMaxSize(),
+            modifier = Modifier
+                .fillMaxSize(),
             verticalArrangement = Arrangement.Top,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
@@ -214,7 +216,7 @@ fun MainScreen(
 
                 Row(
                     modifier = Modifier
-                        .fillMaxWidth(),
+                        .fillMaxWidth().weight(1f),
                     horizontalArrangement = Arrangement.End
                 ) {
 

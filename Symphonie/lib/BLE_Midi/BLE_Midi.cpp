@@ -16,29 +16,31 @@ void BLE_Midi::initBLE()
     // Créer un service
     BLEService *pService = pServer->createService(SERVICE_UUID);
 
-    // Créer la caractéristique MIDI
+    // Initialisation de la caractéristique MIDI
     BLECharacteristic *midiCharacteristic;
     midiCharacteristic = pService->createCharacteristic(
         CHARACTERISTIC_MIDI_UUID,
         BLECharacteristic::PROPERTY_READ |
-        BLECharacteristic::PROPERTY_WRITE |
-        BLECharacteristic::PROPERTY_NOTIFY
+        BLECharacteristic::PROPERTY_WRITE 
+        // BLECharacteristic::PROPERTY_NOTIFY
     );
 
+    // Initialisation la caractéristique Couleur
     BLECharacteristic *colorCharacteristic;
     colorCharacteristic = pService->createCharacteristic(
         CHARACTERISTIC_COLOR_UUID,
         BLECharacteristic::PROPERTY_READ |
-        BLECharacteristic::PROPERTY_WRITE |
-        BLECharacteristic::PROPERTY_NOTIFY
+        BLECharacteristic::PROPERTY_WRITE 
+        // BLECharacteristic::PROPERTY_NOTIFY
     );
 
+    // Initialisation la caractéristique Generic
     BLECharacteristic *genericCharacteristic;
     genericCharacteristic = pService->createCharacteristic(
         CHARACTERISTIC_GENERIC_UUID,
         BLECharacteristic::PROPERTY_READ |
-        BLECharacteristic::PROPERTY_WRITE |
-        BLECharacteristic::PROPERTY_NOTIFY
+        BLECharacteristic::PROPERTY_WRITE 
+        // BLECharacteristic::PROPERTY_NOTIFY
     );
 
     // Définir la valeur initiale de la caractéristique comme une chaîne vide

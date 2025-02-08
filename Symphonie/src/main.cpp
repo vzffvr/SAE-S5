@@ -36,32 +36,36 @@ void loop() {
   // }
   // strip.clear();
   // strip.show();
-  
+
   
   memcpy(new_data, ble_midi.loopBLE(), sizeof(new_data)); // Copie des valeurs de Whats_New qui est dans loopBLE dans new_data
+  ble_midi.reset_tab();
 
-  for(int i=0; i <sizeof(new_data) / sizeof(new_data[0]); i++){ // Division car sizeof retourne des octect
+  for(int i=0; i <sizeof(new_data) / sizeof(new_data[0]); i++){ 
+    // Division car sizeof retourne des octect et non le nb de variables
     switch (new_data[i])
     {
       case Color:
         Serial.println("Maj Color");
         anim.setStripColor(ble_midi.getColorOrder());
+        //Changement de couleur et animation bande de led
         break;
       case MIDI:
         Serial.println("Maj Midi");
-        // anim.setStripColor(ble_midi.getColorOrder());
+        //Traitement: Ajout ou retrait de la touche recu du tableau de touches appuyer.
+        // status = 0x9x -> ajout 
+        // status = 0x8x -> retrait 
         break;
       case Generic:
         Serial.println("Maj generic"); 
-        // anim.setStripColor(ble_midi.getColorOrder());
+        //Traitement: Changement de bande de son
         break;
       
       default:
         break;
     }
-    ble_midi.reset_tab();
   }
-
+  
   if (keypad.getKeys())
   {
       for (int i=0; i<LIST_MAX; i++)   // Scan the whole key list.
@@ -94,6 +98,8 @@ void loop() {
   audioHook();
 }
 
+int8_t myAudioOutput = 0;
+uint8_t number_of_signals = 0;
 
 void updateControl(){
   if(key_pressed[0]!=9999)
@@ -110,11 +116,7 @@ void updateControl(){
     aSin3.setFreq(frequencies[key_pressed[2]]);
   else
     aSin3.setFreq(0);
-}
 
-int8_t myAudioOutput = 0;
-uint8_t number_of_signals = 0;
-AudioOutput updateAudio(){
   myAudioOutput = 0;
   number_of_signals = 0;
   if(key_pressed[0]!=9999){
@@ -133,9 +135,10 @@ AudioOutput updateAudio(){
   }
 
   myAudioOutput = constrain(myAudioOutput, -128, 127);
+}
 
-
-  return MonoOutput::from8Bit(myAudioOutput + 128);
+AudioOutput updateAudio(){
+    return MonoOutput::from8Bit(myAudioOutput + 128);
 }
 
 void add2pressed_key(uint8_t key){
@@ -157,4 +160,3 @@ void remove_from_pressed_key(uint8_t key){
     }
   }
 }
-

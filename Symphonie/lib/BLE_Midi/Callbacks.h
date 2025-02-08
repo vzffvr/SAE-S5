@@ -35,8 +35,9 @@ class MidiCharacteristicCallbacks : public BLECharacteristicCallbacks {
 
         void onWrite(BLECharacteristic* pCharacteristic) override { //Android 2 ESP
             std::string value = pCharacteristic->getValue();
-            const uint8_t* data = reinterpret_cast<const uint8_t*>(value.data()); // Convertis le tableau value.data dans en un uint8_t*
-            
+            const uint8_t* data = reinterpret_cast<const uint8_t*>(value.data()); 
+            // reinterpret_cast change la type d'interpretation en memoire
+            // data pointe simplement l'adresse
             if(value.length() == 4){
                 channel = data[1];   
                 note = data[2];  

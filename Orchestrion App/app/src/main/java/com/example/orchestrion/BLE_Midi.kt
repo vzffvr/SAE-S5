@@ -15,8 +15,6 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Handler
-import android.os.Parcel
-import android.os.Parcelable
 import android.util.Log
 import android.widget.Toast
 import androidx.core.app.ActivityCompat
@@ -24,8 +22,6 @@ import androidx.core.content.ContextCompat
 import java.util.UUID
 
 class BleManager(){
-
-    var someProperty: String = ""
     private lateinit var context: Context
 
     constructor(_context: Context) : this() {
@@ -94,7 +90,7 @@ class BleManager(){
                 //Log.d("BLE_SCAN", "Device found: ${device.name} - ${device.address}")
                 stopScan()
                 Toast.makeText(context, "Connexion réussie", Toast.LENGTH_SHORT).show()
-                device.connectGatt(context, false, gattCallback)
+                device.connectGatt(context, true, gattCallback)
             }
         }
     }
@@ -153,7 +149,7 @@ class BleManager(){
 
 
     @SuppressLint("MissingPermission")
-    fun isOrchestrionConnected(): Boolean {
+    fun isSymphonieConnected(): Boolean {
         return bluetoothGatt?.device?.name.equals("ESP32 BLE Instrument")
     }
 
@@ -163,8 +159,7 @@ class BleManager(){
             return
         }
 
-
-        if (isOrchestrionConnected()) {
+        if (isSymphonieConnected()) {
             Toast.makeText(context, "Déjà connecté", Toast.LENGTH_SHORT).show()
         } else {
             Toast.makeText(context, "Tentative de Reconnexion", Toast.LENGTH_SHORT).show()
@@ -197,22 +192,30 @@ class BleManager(){
     }
 
     @SuppressLint("MissingPermission")
-    fun sendMidiMessage(channel: Int, note: Int, velocity: Int) {
+    fun sendMidiMessage(channel: Int, note: Int?, velocity: Int, NoteON: Boolean = true) {
         if (channel < 1 || channel > 16) {
             Log.e("BLE", "Canal MIDI invalide. Doit être entre 1 et 16.")
             return
         }
-        val statusByte = (0x90 + (channel - 1)).toByte() //Channel
-        val noteByte = note.toByte() //Note
+        var statusByte = (0x80 + (channel - 1)).toByte() //Channel
+        //98 ->Note ON canal 7
+        //99 ->Note ON canal 8
+        //83 ->Note OFF canal 2
+        var noteByte: Byte
+        noteByte = if(note!=null)
+            note.toByte()
+        else 9999.toByte()
         val velocityByte = velocity.toByte() //Velocity
 
-        val midiPacket = byteArrayOf(0x80.toByte(), statusByte, noteByte, velocityByte)
+        if(NoteON)
+            statusByte = (0x90 + (channel - 1)).toByte()
+
+        val midiPacket = byteArrayOf(0x90.toByte(), statusByte, noteByte, velocityByte)
         midiWriteCharacteristic?.value = midiPacket
 
         bluetoothGatt?.writeCharacteristic(midiWriteCharacteristic)
 
         Log.d("BLE", "Message envoyé: $channel,\t $note, \t $velocity")
-
     }
 
     @SuppressLint("MissingPermission")
@@ -234,10 +237,10 @@ class BleManager(){
     @SuppressLint("MissingPermission")
     fun sendGenericOrder(content1: Int, content2: Int, content3: Int, content4: Int) {
 
-        val Content1 = content1.toByte() //Rouge
-        val Content2 = content2.toByte() //Vert
-        val Content3 = content3.toByte() //Blue
-        val Content4 = content4.toByte() //Blue
+        val Content1 = content1.toByte()
+        val Content2 = content2.toByte()
+        val Content3 = content3.toByte()
+        val Content4 = content4.toByte()
 
         val genericPacket = byteArrayOf(0x00.toByte(), Content1, Content2, Content3, Content4)
         genericWriteCharacteristic?.value = genericPacket

@@ -30,9 +30,13 @@ char keys[ROWS][COLS] = {
 };
 
 const float frequencies[NUM_FREQUENCIES] = {
-    20, 43, 85, 129, 173, 261, 349, 440, 523, 698, 880, 1046,
-    1397, 1760, 2093, 2794, 3520, 4186, 5588, 7040, 8372, 11175, 14080, 20000
+  20, 43, 85, 129, 173, 261, 349, 440, 523, 698, 880, 1046,
+  1397, 1760, 2093, 2794, 3520, 4186, 5588, 7040, 8372, 11175, 14080, 20000
 };
 
 void add2pressed_key(uint8_t key);
 void remove_from_pressed_key(uint8_t key);
+
+uint8_t Index2Key(uint8_t index){
+
+}
