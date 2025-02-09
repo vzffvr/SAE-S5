@@ -1,9 +1,12 @@
 #ifndef Animation_Neopix_h
-    #define Animation_Neopix_h
-    #include <Adafruit_NeoPixel.h>
+#define Animation_Neopix_h
+#include <Adafruit_NeoPixel.h>
 
  
-#define NUMPIXELS 200
+#define NUMPIXELS 144
+#define NEOPIX_PIN 23
+#define PERIODE_CWIPE 20
+#define PERIODE_POUMO 25 //EDGE
 
 class Animation_Neopix{
     private:
@@ -11,40 +14,39 @@ class Animation_Neopix{
     uint8_t green;
     uint8_t blue;
     uint8_t animation;
+    uint8_t last_animation;
+    uint8_t Mpixel;
 
-    public:
-    uint8_t rotation;
-    uint8_t intensite;
+    enum MODE{
+        MANUEL,
+        AUTO,
+        SEMI_AUTO
+    };
+    uint8_t mode;
+    int pressed_key[3];
+    uint32_t maintenant;
+    bool reverse_poumo;
+    uint8_t intensite_poumo;
 
-    double poumon_i;
+    void suiveur();
+    void colorWipe(uint8_t pixel);
+    void Ambiance();
+    void Poumonage();
+    void colorWipeCenter(uint8_t pixel);
+    void colorWipeEdge(uint8_t pixel);
+    void doubleComete(uint8_t pixel);
+    uint8_t milieu;
     int k;
+    bool reverse;
+
+    //--------------------------------------------------//
+    public:
     Animation_Neopix(); 
-
-    uint8_t counter_chenille;
-    uint16_t ri_last;
-    uint16_t gi_last;
-    uint16_t bi_last;
-    
-    uint8_t milieu1;
-    uint8_t milieu2;
-
-
-
-
-    //--------------- demonstrateur ---------------------
-    void comete(uint16_t pixel,  Adafruit_NeoPixel *strip);
-    void poumon(uint16_t pixel,  Adafruit_NeoPixel *strip);
-    void cwipe(uint16_t pixel,  Adafruit_NeoPixel *strip);
-    void doubleComete(uint8_t pixel,  Adafruit_NeoPixel *strip);
-    void doubleCWcentre(uint8_t pixel, bool reverse,  Adafruit_NeoPixel *strip);
-    void doubleCWext(uint8_t pixel, bool reverse,  Adafruit_NeoPixel *strip);
-    // ----------------------------------
-    void colorWipe(uint32_t color, uint16_t wait ,Adafruit_NeoPixel *strip);
-    void Rotation_rubans(uint16_t tempo, Adafruit_NeoPixel *strip);
-    void Trainee(uint32_t color, uint16_t tempo, Adafruit_NeoPixel *strip);
-    void Scintillement(uint32_t color, uint16_t tempo, Adafruit_NeoPixel *strip);
-
+    void begin();
     void setStripColor(uint8_t tab[]);
+    void setKeys(int tab[]);
+    void updateNeo();
+    
 };
 
 #endif

@@ -46,7 +46,7 @@ class MidiCharacteristicCallbacks : public BLECharacteristicCallbacks {
                 update_value = true;
             }
 
-            Serial.printf("Donnée Midi reçue : channel = %d \t, note = %d \t, velocity = %d \n", channel, note, velocity);
+            Serial.printf("Donnée Midi reçue : channel = %X \t, note = %X \t, velocity = %X \n", channel, note, velocity);
 
         }
         void onRead(BLECharacteristic *pCharacteristic) override {//ESP 2 Android
@@ -54,7 +54,11 @@ class MidiCharacteristicCallbacks : public BLECharacteristicCallbacks {
         }
     public: 
         uint8_t* getMidiOrder(){
-            static uint8_t tab[3] = {channel, note, velocity} ;
+            static uint8_t tab[3] ;
+
+            tab[0] = channel;
+            tab[1] = note;
+            tab[2] = velocity;
             return tab;
         }
 
@@ -124,7 +128,8 @@ class ColorCharacteristicCallbacks : public BLECharacteristicCallbacks {
             std::string value = pCharacteristic->getValue();
             const uint8_t* data = reinterpret_cast<const uint8_t*>(value.data()); // Convertis le tableau value.data dans en un uint8_t*
             size_t length = value.length();
-
+            // reinterpret_cast change la type d'interpretation en memoire
+            // data pointe simplement l'adresse
             if (length == 5 && (data[0] == 0xFF)) {
                 
                 red = data[1];    
@@ -145,7 +150,11 @@ class ColorCharacteristicCallbacks : public BLECharacteristicCallbacks {
 
     public: 
         uint8_t* getColors(){
-            static uint8_t tab[4]= { red, green,blue, animation}; 
+            static uint8_t tab[4]; 
+            tab[0] = red;  // Réassigner à chaque appel
+            tab[1] = green;
+            tab[2] = blue;
+            tab[3] = animation;
             return tab;
         }// static car je retourne une variable local et si pas de static alors variable supprimer apres appel a la fonction
 

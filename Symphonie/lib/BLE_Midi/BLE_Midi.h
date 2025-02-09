@@ -37,6 +37,7 @@ private:
 
 public:
     BLE_Midi(); // Déclaration du constructeur
+
     void initBLE();
     NEW_MSG* loopBLE();
     

@@ -69,8 +69,7 @@ void BLE_Midi::initBLE()
 }
 
 NEW_MSG* BLE_Midi::loopBLE(){
-    if((millis() - maintenant_loop == PERIODE) | (millis() < maintenant_loop)){//Toutes les 100ms ou si millis depasse 47 jours
-        
+    if((millis() - maintenant_loop >= PERIODE) | (millis() < maintenant_loop)){//Toutes les 100ms ou si millis depasse 47 jours
         maintenant_loop = millis();
         if(ServerCallback.getIsConnected()){
             if (MidiCallBack.getUpdate()){
@@ -97,12 +96,6 @@ NEW_MSG* BLE_Midi::loopBLE(){
     return WhatsNew;
 }
 
-void BLE_Midi::reset_tab(){
-    WhatsNew[0] = {No_New_Msg};
-    WhatsNew[1] = {No_New_Msg};
-    WhatsNew[2] = {No_New_Msg};
-}
-
 uint8_t* BLE_Midi::getColorOrder(){
     return ColorCallBack.getColors();
 }
@@ -114,3 +107,11 @@ uint8_t* BLE_Midi::getMidiOrder(){
 uint8_t BLE_Midi::getSignal(){
     return GenericCallBack.getSignal();
 }
+
+
+void BLE_Midi::reset_tab(){
+    WhatsNew[0] = {No_New_Msg};
+    WhatsNew[1] = {No_New_Msg};
+    WhatsNew[2] = {No_New_Msg};
+}
+
