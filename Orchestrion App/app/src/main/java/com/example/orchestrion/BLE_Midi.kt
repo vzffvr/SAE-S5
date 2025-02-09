@@ -201,10 +201,7 @@ class BleManager(){
         //98 ->Note ON canal 7
         //99 ->Note ON canal 8
         //83 ->Note OFF canal 2
-        var noteByte: Byte
-        noteByte = if(note!=null)
-            note.toByte()
-        else 9999.toByte()
+        var noteByte: Byte = note?.toByte() ?: 9999.toByte()
         val velocityByte = velocity.toByte() //Velocity
 
         if(NoteON)
@@ -215,7 +212,12 @@ class BleManager(){
 
         bluetoothGatt?.writeCharacteristic(midiWriteCharacteristic)
 
-        Log.d("BLE", "Message envoyé: $channel,\t $note, \t $velocity")
+        Log.d(
+            "BLE",
+            "Message envoyé: 0x${statusByte.toUByte().toString(16).uppercase()}, " +
+                    "\t 0x${noteByte.toUByte().toString(16).uppercase()}, " +
+                    "\t 0x${velocityByte.toUByte().toString(16).uppercase()}"
+        )
     }
 
     @SuppressLint("MissingPermission")

@@ -69,8 +69,7 @@ void BLE_Midi::initBLE()
 }
 
 NEW_MSG* BLE_Midi::loopBLE(){
-    if((millis() - maintenant_loop == PERIODE) | (millis() < maintenant_loop)){//Toutes les 100ms ou si millis depasse 47 jours
-        
+    if((millis() - maintenant_loop >= PERIODE) | (millis() < maintenant_loop)){//Toutes les 100ms ou si millis depasse 47 jours
         maintenant_loop = millis();
         if(ServerCallback.getIsConnected()){
             if (MidiCallBack.getUpdate()){

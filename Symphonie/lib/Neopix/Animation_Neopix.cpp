@@ -1,6 +1,5 @@
 #include <Arduino.h>
 #include <Adafruit_NeoPixel.h>
-#include <cstdlib>
 #include "Animation_Neopix.h"
 
 //classe contenant des animations pour des rubans de LED Neopix (sans matrices)
@@ -23,34 +22,34 @@ Animation_Neopix::Animation_Neopix(void){
 
     mode = 255;
 
-    pressed_key[3] = {0};
+    for (int i = 0; i < 3; i++){
+        pressed_key[i] = 9999;}
 
+    
+}
+
+void Animation_Neopix::begin(){
     strip.begin();
-    strip.setBrightness(255);
+    strip.setBrightness(100);
+    strip.clear();
+    strip.show();
 }
 
 void Animation_Neopix::updateNeo(){
     if(animation != last_animation){
         last_animation = animation;
-        pixel = 0;
+        Mpixel = 0;
+        strip.clear();
+        strip.show();
     }
-    switch (animation)
+    switch (animation-1)
     {
     case 0:
-        for(int i = 0; i< 3; i++){
-            if ((pressed_key[i] != 9999) && pressed_key[i] <= NUMPIXELS)
-                strip.setPixelColor(pressed_key[i]++, strip.Color(red, green, blue));
-                strip.setPixelColor(pressed_key[i], strip.Color(red, green, blue));
-                if (pressed_key[i] != 0)
-                {
-                    strip.setPixelColor(pressed_key[i]--, strip.Color(red, green, blue));
-                }
-        } 
-        strip.show();
+        suiveur();
         break;
 
     case 1: //Cwipe
-        colorWipe(pixel);
+        colorWipe(Mpixel);
         break;
 
     case 2:
@@ -58,15 +57,15 @@ void Animation_Neopix::updateNeo(){
         break;
 
     case 3:
-        doubleComete(pixel);
+        doubleComete(Mpixel);
         break;
 
     case 4:
-        colorWipeCenter(pixel); 
+        colorWipeCenter(Mpixel); 
         break;  
 
     case 5:
-        colorWipeEdge(pixel); 
+        colorWipeEdge(Mpixel); 
         break;   
 
     case 6:
@@ -75,25 +74,51 @@ void Animation_Neopix::updateNeo(){
     
     default:
         break;
-    }  
-    pixel++;   
-}
-
-void Animation_Neopix::Ambiance() { 
-    if((millis() - maintenant == PERIODE_CWIPE) | (millis() < maintenant)){
-        maintenant = millis();
-        for(int i =0; i < NUMPIXELS; i++){
-          strip.setPixelColor(pixel, strip.Color(red,green,blue));
-        }
+    }   
+    if (Mpixel >= NUMPIXELS)
+    {
+        Mpixel = 0;
+        strip.clear();
         strip.show();
     }
+         
+}
+void Animation_Neopix::suiveur() {
+    for (int i = 0; i < 3; i++) {
+        strip.clear();
+        if ((pressed_key[i] != 9999) && (pressed_key[i] < NUMPIXELS)) {
+            strip.setPixelColor(pressed_key[i], strip.Color(red, green, blue));
+
+            if (pressed_key[i] + 1 < NUMPIXELS) {
+                strip.setPixelColor(pressed_key[i] + 1, strip.Color(red, green, blue));
+            }
+
+            if (pressed_key[i] - 1 >= 0) {
+                strip.setPixelColor(pressed_key[i] - 1, strip.Color(red, green, blue));
+            }
+        }
+    }
+    strip.show();
+}
+void Animation_Neopix::Ambiance() { 
+    maintenant = millis();
+    strip.clear();
+    for(int i = 0; i < NUMPIXELS; i++){
+        strip.setPixelColor(i, strip.Color(red,green,blue));
+    }
+    strip.show();
+    
 }
 
 void Animation_Neopix::Poumonage() { 
-    if((millis() - maintenant == PERIODE_POUMO) | (millis() < maintenant)){
+    if((millis() - maintenant >= PERIODE_POUMO) || (millis() < maintenant)){
+        Serial.println("Poumo");
         maintenant = millis();
 
-        strip.setPixelColor(pixel, strip.Color(red *intensite_poumo, green * intensite_poumo, blue * intensite_poumo));
+        for(int i = 0; i < NUMPIXELS; i++){
+            strip.setPixelColor(i, strip.Color(red *intensite_poumo, green * intensite_poumo, blue * intensite_poumo));
+        }
+        
         strip.show();
         
         intensite_poumo = intensite_poumo + 0.05*k;
@@ -109,26 +134,29 @@ void Animation_Neopix::Poumonage() {
 }
 
 void Animation_Neopix::colorWipe(uint8_t pixel) { 
-    if((millis() - maintenant == PERIODE_CWIPE) | (millis() < maintenant)){
+    if((millis() - maintenant >= PERIODE_CWIPE) || (millis() < maintenant)){
         maintenant = millis();
         strip.setPixelColor(pixel, strip.Color(red,green,blue));
         strip.show();
+        Mpixel++;
     }
 }
 
 void Animation_Neopix::doubleComete(uint8_t pixel){
-    if((millis() - maintenant == PERIODE_CWIPE) | (millis() < maintenant)){
+    if((millis() - maintenant >= PERIODE_CWIPE) || (millis() < maintenant)){
         maintenant = millis();
         strip.setPixelColor(pixel, strip.Color(red, green, blue));
-        strip.setPixelColor(pixel-3,strip.Color(0, 0, 0));
+        strip.setPixelColor(pixel-5,strip.Color(0, 0, 0));
         strip.setPixelColor(NUMPIXELS - pixel, strip.Color(red, green, blue));
-        strip.setPixelColor(NUMPIXELS - pixel + 3,strip.Color(0, 0, 0));
+        strip.setPixelColor(NUMPIXELS - pixel + 5,strip.Color(0, 0, 0));
         strip.show();
+        Mpixel++;
     }
 }
 
 void Animation_Neopix::colorWipeCenter(uint8_t pixel){
-    if((millis() - maintenant == PERIODE_CWIPE) | (millis() < maintenant)){
+    if((millis() - maintenant >= PERIODE_CWIPE) || (millis() < maintenant)){
+        //FAIRE REVERSE
         maintenant = millis();
         if(reverse == false){
             strip.setPixelColor(milieu + 1  + pixel, strip.Color(red, green, blue));
@@ -138,11 +166,13 @@ void Animation_Neopix::colorWipeCenter(uint8_t pixel){
             strip.setPixelColor(milieu - 1 - pixel, strip.Color(0, 0, 0));
         }
         strip.show();
+        Mpixel++;
     }
 }
 
 void Animation_Neopix::colorWipeEdge(uint8_t pixel){
-    if((millis() - maintenant == PERIODE_CWIPE) | (millis() < maintenant)){
+    if((millis() - maintenant >= PERIODE_CWIPE) || (millis() < maintenant)){
+        //FAIRE REVERSE
         maintenant = millis();
         if(reverse == false){
             strip.setPixelColor(NUMPIXELS-pixel, strip.Color(red, green, blue));
@@ -152,6 +182,7 @@ void Animation_Neopix::colorWipeEdge(uint8_t pixel){
             strip.setPixelColor( pixel, strip.Color(0, 0, 0));
         }
         strip.show();
+        Mpixel++;
     }
 }
 
@@ -161,4 +192,10 @@ void Animation_Neopix::setStripColor(uint8_t tab[]){
     blue = tab[2];
 
     animation = tab[3];
+}
+
+void Animation_Neopix::setKeys(int tab[]){
+    pressed_key[0] = tab[0];
+    pressed_key[1] = tab[1];
+    pressed_key[2] = tab[2];
 }

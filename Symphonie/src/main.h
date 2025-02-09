@@ -5,7 +5,9 @@
 #include <Oscil.h> // oscillator template
 #include <tables/sin4096_int8.h> // sine table for oscillator
 #include <tables/triangle_dist_cubed_2048_int8.h> // sine table for oscillator
-#include <tables/sin4096_int8.h> // sine table for oscillator
+#include <tables/SAW4096_int8.h> // sine table for oscillator
+#include <tables/waveshape_chebyshev_6th_256_int8.h> // sine table for oscillator
+
 
 #define MOZZI_CONTROL_RATE 128 // MAX1024 mais latence
 #define  ROWS  5 // 5 lignes
@@ -35,7 +37,4 @@ const float frequencies[NUM_FREQUENCIES] = {
 
 void add2pressed_key(uint8_t key);
 void remove_from_pressed_key(uint8_t key);
-
-uint8_t Index2Key(uint8_t index){
-
-}
+void scanKeyboard();

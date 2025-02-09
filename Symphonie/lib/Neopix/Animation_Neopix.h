@@ -3,10 +3,10 @@
 #include <Adafruit_NeoPixel.h>
 
  
-#define NUMPIXELS 200
+#define NUMPIXELS 144
 #define NEOPIX_PIN 23
-#define PERIODE_CWIPE 50
-#define PERIODE_POUMO 50 //EDGE
+#define PERIODE_CWIPE 20
+#define PERIODE_POUMO 25 //EDGE
 
 class Animation_Neopix{
     private:
@@ -15,7 +15,7 @@ class Animation_Neopix{
     uint8_t blue;
     uint8_t animation;
     uint8_t last_animation;
-    uint8_t pixel;
+    uint8_t Mpixel;
 
     enum MODE{
         MANUEL,
@@ -23,11 +23,12 @@ class Animation_Neopix{
         SEMI_AUTO
     };
     uint8_t mode;
-    uint8_t pressed_key[3];
+    int pressed_key[3];
     uint32_t maintenant;
     bool reverse_poumo;
     uint8_t intensite_poumo;
 
+    void suiveur();
     void colorWipe(uint8_t pixel);
     void Ambiance();
     void Poumonage();
@@ -41,8 +42,9 @@ class Animation_Neopix{
     //--------------------------------------------------//
     public:
     Animation_Neopix(); 
-    
+    void begin();
     void setStripColor(uint8_t tab[]);
+    void setKeys(int tab[]);
     void updateNeo();
     
 };

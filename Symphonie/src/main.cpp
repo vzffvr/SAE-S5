@@ -3,41 +3,33 @@
 
 NEW_MSG new_data[3] {No_New_Msg};
 
+
 uint8_t signal_form = 0;
+uint8_t last_signal_form = signal_form;
+uint8_t midiOrder[3] = {0};
 
 Keypad keypad = Keypad(makeKeymap(keys), rowPins, colPins, ROWS, COLS);
 Animation_Neopix anim;
 BLE_Midi ble_midi;
-Oscil <SIN4096_NUM_CELLS, MOZZI_AUDIO_RATE> aSin1(SIN4096_DATA);
-Oscil <SIN4096_NUM_CELLS, MOZZI_AUDIO_RATE> aSin2(SIN4096_DATA);
-Oscil <SIN4096_NUM_CELLS, MOZZI_AUDIO_RATE> aSin3(SIN4096_DATA);
+Oscil <SIN4096_NUM_CELLS, MOZZI_AUDIO_RATE> oscil1(SIN4096_DATA);
+Oscil <SIN4096_NUM_CELLS, MOZZI_AUDIO_RATE> oscil2(SIN4096_DATA);
+Oscil <SIN4096_NUM_CELLS, MOZZI_AUDIO_RATE> oscil3(SIN4096_DATA);
+Oscil <SIN4096_NUM_CELLS, MOZZI_AUDIO_RATE> tableau[3] = {oscil1, oscil2, oscil3};
 
 void setup() {
   Serial.begin(115200);
   ble_midi.initBLE();
 
+  anim.begin();
+
   startMozzi();
-  aSin1.setFreq(1000.f); 
-  aSin2.setFreq(1000.f); 
-  aSin3.setFreq(1000.f); 
+  oscil1.setFreq(1000.f); 
+  oscil2.setFreq(1000.f); 
+  oscil3.setFreq(1000.f); 
 }
 
 void loop() {
 
-  // for(int i=0; i<20; i++) {
-  //   strip.setPixelColor(i, strip.Color(255, 255, 255));
-
-  //   strip.show();
-
-  //   delay(30);
-  // }
-  // strip.clear();
-  // strip.show();
-
-  new_data[0] = ble_midi.loopBLE()[0];
-  new_data[1] = ble_midi.loopBLE()[1];
-  new_data[2] = ble_midi.loopBLE()[2];
-  
   memcpy(new_data, ble_midi.loopBLE(), sizeof(new_data)); // Copie des valeurs de Whats_New qui est dans loopBLE dans new_data
   ble_midi.reset_tab();
 
@@ -52,13 +44,17 @@ void loop() {
         break;
       case MIDI:
         Serial.println("Maj Midi");
-        //Traitement: Ajout ou retrait de la touche recu du tableau de touches appuye.
-        // status = 0x9x -> ajout 
-        // status = 0x8x -> retrait 
+        memcpy(midiOrder, ble_midi.getMidiOrder(), sizeof(midiOrder));
+
+        if ((midiOrder[0] >> 4) ==  9){
+          add2pressed_key(midiOrder[1]-12);
+        }else if ((midiOrder[0] >> 4) ==  8){
+          remove_from_pressed_key(midiOrder[1]-12);
+        }
         break;
       case Generic:
         Serial.println("Maj generic"); 
-        //Traitement: Changement de bande de son
+        signal_form = ble_midi.getSignal();
         break;
       
       default:
@@ -66,6 +62,115 @@ void loop() {
     }
   }
   
+  scanKeyboard();
+  anim.setKeys(key_pressed);
+  anim.updateNeo();
+  audioHook();
+}
+
+int8_t myAudioOutput = 0;
+uint8_t number_of_signals = 0;
+
+void updateControl(){
+  if(last_signal_form != signal_form){
+    switch (signal_form)
+    {
+      case 0:
+        oscil1.setTable(SIN4096_DATA);
+        break;
+      case 1:
+        oscil1.setTable(SAW4096_DATA);
+        break;
+      case 2:
+        oscil1.setTable(TRIANGLE_DIST_CUBED_2048_DATA);
+        break;
+      case 3:
+        oscil1.setTable(CHEBYSHEV_6TH_256_DATA);
+        break;
+      
+      default:
+        break;
+    }
+  }
+
+  myAudioOutput = 0;
+  number_of_signals = 0;
+  for(int i =0;i<3;i++){
+    if(key_pressed[i]!=9999){
+      tableau[i].setFreq(frequencies[key_pressed[i]]); // Changement de freq
+      myAudioOutput = myAudioOutput + tableau[i].next(); // ajout dans myAudioOutput
+      number_of_signals++;
+    }
+    else
+      tableau[i].setFreq(0);
+  }
+  // if(key_pressed[0]!=9999) // Changement de freq
+  //   oscil1.setFreq(frequencies[key_pressed[0]]);
+  // else
+  //   oscil1.setFreq(0);
+
+  // if(key_pressed[1]!=9999)
+  //   oscil2.setFreq(frequencies[key_pressed[1]]);
+  // else
+  //   oscil2.setFreq(0);
+
+  // if(key_pressed[2]!=9999)
+  //   oscil3.setFreq(frequencies[key_pressed[2]]);
+  // else
+  //   oscil3.setFreq(0);
+
+  
+
+  // if(key_pressed[0]!=9999){ // ajout dans myAudioOutput
+  //   myAudioOutput = myAudioOutput + oscil1.next();
+  //   number_of_signals++;
+  // }
+
+  // if(key_pressed[1]!=9999){
+  //   myAudioOutput = myAudioOutput + oscil2.next();
+  //   number_of_signals++;
+  // }
+
+  // if(key_pressed[2]!=9999){
+  //   myAudioOutput = myAudioOutput + oscil3.next();
+  //   number_of_signals++;
+  // }
+
+  myAudioOutput = constrain(myAudioOutput, -128, 127);
+}
+
+AudioOutput updateAudio(){
+    return MonoOutput::from8Bit(myAudioOutput/*+ 128*/);
+}
+
+void add2pressed_key(uint8_t key){
+  for(int i = 0; i<3;i++){
+    if (key_pressed[i] == 9999)
+    {
+      key_pressed[i] = key;
+      Serial.print("add: ");
+      Serial.println(key);
+      return;
+    }
+  }
+  Serial.printf("tab = %d \t, note = %d \t, velocity = %d \n", key_pressed[0], key_pressed[1], key_pressed[2]);
+  Serial.println("Tableau complet maximum de touche appuye en meme temps:3");
+}
+
+void remove_from_pressed_key(uint8_t key){
+  for(int i = 0; i<3;i++){
+    if (key_pressed[i] == key)
+    {
+      Serial.print("remove: ");
+      Serial.println(key);
+      key_pressed[i] = 9999;
+      return;
+    }
+  }
+  Serial.println("Erreur, Touche non appuye");
+}
+
+void scanKeyboard(){
   if (keypad.getKeys())
   {
       for (int i=0; i<LIST_MAX; i++)   // Scan the whole key list.
@@ -95,68 +200,5 @@ void loop() {
           }
       }
   }
-  audioHook();
 }
 
-int8_t myAudioOutput = 0;
-uint8_t number_of_signals = 0;
-
-void updateControl(){
-  if(key_pressed[0]!=9999)
-    aSin1.setFreq(frequencies[key_pressed[0]]);
-  else
-    aSin1.setFreq(0);
-
-  if(key_pressed[1]!=9999)
-    aSin2.setFreq(frequencies[key_pressed[1]]);
-  else
-    aSin2.setFreq(0);
-
-  if(key_pressed[2]!=9999)
-    aSin3.setFreq(frequencies[key_pressed[2]]);
-  else
-    aSin3.setFreq(0);
-
-  myAudioOutput = 0;
-  number_of_signals = 0;
-  if(key_pressed[0]!=9999){
-    myAudioOutput = myAudioOutput + aSin1.next();
-    number_of_signals++;
-  }
-
-  if(key_pressed[1]!=9999){
-    myAudioOutput = myAudioOutput + aSin2.next();
-    number_of_signals++;
-  }
-
-  if(key_pressed[2]!=9999){
-    myAudioOutput = myAudioOutput + aSin3.next();
-    number_of_signals++;
-  }
-
-  myAudioOutput = constrain(myAudioOutput, -128, 127);
-}
-
-AudioOutput updateAudio(){
-    return MonoOutput::from8Bit(myAudioOutput + 128);
-}
-
-void add2pressed_key(uint8_t key){
-  for(int i = 0; i<3;i++){
-    if (key_pressed[i] == 9999)
-    {
-      key_pressed[i] = key;
-      break;
-    }
-  }
-}
-
-void remove_from_pressed_key(uint8_t key){
-  for(int i = 0; i<3;i++){
-    if (key_pressed[i] == key)
-    {
-      key_pressed[i] = 9999;
-      break;
-    }
-  }
-}

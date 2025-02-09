@@ -74,7 +74,7 @@ fun ColorPicker(
         mutableIntStateOf(viewModel.alpha10)
     }
 
-    val options = listOf("Disabled", "Ambiance", "ColorWipe", "WipeCenter", "WipeEdge")
+    val options = listOf("Suiveur", "ColorWipe","Ambiance","Double Comete",  "WipeCenter", "WipeEdge", "Poumonage")
 
     var hexCode by remember { mutableStateOf(viewModel.hexCode) }
     var textColor by remember { mutableStateOf(viewModel.textColor) }
@@ -121,6 +121,7 @@ fun ColorPicker(
                     viewModel.setTC(textColor)
 
                     animation = viewModel.animation
+                    viewModel.setColors(red10, green10,blue10)
 
                     bleManager?.sendColorOrder(red10, green10, blue10, animation)
                 }
