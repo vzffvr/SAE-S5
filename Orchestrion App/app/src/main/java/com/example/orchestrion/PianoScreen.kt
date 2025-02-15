@@ -57,6 +57,7 @@ import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import com.example.orchestrion.colorpicker.ColorViewModel
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json.Default.configuration
@@ -164,44 +165,46 @@ fun string2Midi(note: String): Int? {
         return 99999
 }
 
-
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun WhiteKey(
     text: String = "A1",
     color: Color = Color.White,
     onPress: () -> Unit = {},
-    onRelease: () -> Unit = {}
+    onRelease: () -> Unit = {},
+    onHold: () -> Unit = {},
 ) {
-
     var backgroundColor by remember { mutableStateOf(Color.White) }
     val coroutineScope = rememberCoroutineScope()
+    var isHolding by remember { mutableStateOf(false) }
+    val currentJob = remember { mutableStateOf<Job?>(null) }
 
     Button(
-        onClick = {/*Pas besoin mais obligatoire*/},
+        onClick = {}, // Désactivé car on gère les événements manuellement
         modifier = Modifier
-            .width(74.dp)               // Largeur fixe à 74dp
-            .fillMaxHeight()            // Hauteur égale à celle du parent (match_parent)
-            .padding(start = 2.dp)        // Marge de début de 2dp
-            // Gestion des événements tactiles pour ACTION_DOWN et ACTION_UP
+            .width(74.dp)
+            .fillMaxHeight()
+            .padding(start = 2.dp)
             .pointerInteropFilter { motionEvent ->
-                when (motionEvent.action) {
-                    MotionEvent.ACTION_DOWN -> {
-                        backgroundColor = color
-                        Log.d("KeyButton", "WhiteKey: $text")
-                        coroutineScope.launch {
-                            delay(100)
+                when (motionEvent.actionMasked) {
+                    MotionEvent.ACTION_DOWN, MotionEvent.ACTION_POINTER_DOWN -> {
+                        if (!isHolding) { // Évite de redéclencher pour la même touche
+                            isHolding = true
+                            backgroundColor = color
+                            currentJob.value = coroutineScope.launch {
+                                while (isHolding) {
+                                    onHold()
+                                    delay(100)
+                                }
+                            }
+                            onPress()
                         }
-                        onPress()
                         true
                     }
 
-                    MotionEvent.ACTION_MOVE -> {
-                        backgroundColor = Color.White
-                        true
-                    }
-
-                    MotionEvent.ACTION_UP -> {
+                    MotionEvent.ACTION_UP, MotionEvent.ACTION_POINTER_UP -> {
+                        isHolding = false
+                        currentJob.value?.cancel()
                         backgroundColor = Color.White
                         onRelease()
                         true
@@ -211,20 +214,14 @@ fun WhiteKey(
                 }
             },
         colors = ButtonDefaults.buttonColors(containerColor = backgroundColor),
-        shape = RectangleShape, // Coins carrés (90°)
-        // Padding en bas de 8dp pour aligner le contenu (texte)
-        contentPadding = PaddingValues(bottom = 8.dp),
+        shape = RectangleShape,
+        contentPadding = PaddingValues(bottom = 8.dp)
     ) {
-        // Contenu du bouton : texte aligné en bas et centré horizontalement
         Box(
             modifier = Modifier.fillMaxSize(),
             contentAlignment = Alignment.BottomCenter
         ) {
-            Text(
-                text = text,
-                color = Color.Black,
-                textAlign = TextAlign.Center
-            )
+            Text(text = text, color = Color.Black)
         }
     }
 }
@@ -236,36 +233,43 @@ fun BlackKey(
     color: Color = Color.Black,
     onPress: () -> Unit = {},
     onRelease: () -> Unit = {},
+    onHold: () -> Unit = {}
 ) {
     var backgroundColor by remember { mutableStateOf(Color.Black) }
     val coroutineScope = rememberCoroutineScope()
+    var isHolding by remember { mutableStateOf(false) }
+    val currentJob = remember { mutableStateOf<Job?>(null) }
 
     Button(
-        onClick = { /* onClick vide, la gestion tactile se fait via pointerInteropFilter */ },
+        onClick = {}, // Désactivé car on gère les événements manuellement
         modifier = Modifier
             .width(52.dp)
             .fillMaxHeight(0.8f)
             .offset(y = (-25).dp)      // Décalage vertical négatif de 25dp
             .pointerInteropFilter { motionEvent ->
-                when (motionEvent.action) {
-                    MotionEvent.ACTION_DOWN -> {
-                        // À l'appui, on change la couleur de fond en #80ffe5 et on log l'index
-                        backgroundColor = color
-                        coroutineScope.launch {
-                            delay(100)
+                when (motionEvent.actionMasked) {
+                    MotionEvent.ACTION_DOWN, MotionEvent.ACTION_POINTER_DOWN -> {
+                        if (!isHolding) { // Évite de redéclencher pour la même touche
+                            isHolding = true
+                            backgroundColor = color
 
+                            // D'abord, appeler onPress()
+                            onPress()
+
+                            // Ensuite, démarrer la boucle onHold()
+                            currentJob.value = coroutineScope.launch {
+                                while (isHolding) {
+                                    onHold()
+                                    delay(100)
+                                }
+                            }
                         }
-                        onPress()
                         true
                     }
 
-                    MotionEvent.ACTION_MOVE -> {
-                        backgroundColor = Color.Black
-                        onRelease()
-                        true
-                    }
-
-                    MotionEvent.ACTION_UP -> {
+                    MotionEvent.ACTION_UP, MotionEvent.ACTION_POINTER_UP -> {
+                        isHolding = false
+                        currentJob.value?.cancel()
                         backgroundColor = Color.Black
                         onRelease()
                         true
@@ -288,6 +292,7 @@ fun BlackKey(
         }
     }
 }
+
 
 @Composable
 fun CustomSeekBarWithScroll(content: @Composable () -> Unit = {}) {
