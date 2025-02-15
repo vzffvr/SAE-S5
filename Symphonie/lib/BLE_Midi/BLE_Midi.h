@@ -44,6 +44,7 @@ public:
     uint8_t* getColorOrder();
     uint8_t* getMidiOrder();
     uint8_t getSignal();
+    bool IsConnected();
     void reset_tab();
 };
 

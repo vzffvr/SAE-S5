@@ -108,6 +108,10 @@ uint8_t BLE_Midi::getSignal(){
     return GenericCallBack.getSignal();
 }
 
+bool BLE_Midi::IsConnected(){
+    return ServerCallback.getIsConnected();
+}
+
 
 void BLE_Midi::reset_tab(){
     WhatsNew[0] = {No_New_Msg};

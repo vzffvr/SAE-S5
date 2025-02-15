@@ -126,7 +126,7 @@ fun SpinnerAnim(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SpinnerConfig(
-    viewModel: ColorViewModel,
+//    viewModel: ColorViewModel,
     bleManager: BleManager?,
     options: List<String>,
     titre: String?,

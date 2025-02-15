@@ -13,6 +13,7 @@
 #define  ROWS  5 // 5 lignes
 #define  COLS  5 // 5 colonnes
 #define NUM_FREQUENCIES 24
+// #define CONNECTION_LED 10
 
 
 byte rowPins[ROWS] = {16, 17, 18, 4, 19}; // 17 // Lignes

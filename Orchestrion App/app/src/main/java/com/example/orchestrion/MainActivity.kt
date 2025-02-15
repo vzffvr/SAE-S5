@@ -134,9 +134,9 @@ class MainActivity : ComponentActivity() {
 
                     composable<ConfigScreen> {
                         ConfigScreen(
-                            viewmodel = colorViewModel,
+                            viewmodel = viewModel,
                             navController = navController,
-                            BLeManager = bleManager
+                            bleManager = bleManager
                         )
                     }
                     composable<Piano> {

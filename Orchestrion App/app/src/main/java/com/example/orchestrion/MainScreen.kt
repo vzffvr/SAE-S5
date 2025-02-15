@@ -165,26 +165,26 @@ fun MainScreen(
                     )
                 }
 
-                /*
-                                Button(
-                                    shape = ShapeDefaults.ExtraLarge,
-                                    border = buttonborder,
-                                    colors = buttonColor,
-                                    modifier = Modifier
-                                        .weight(1f)
-                                        .fillMaxWidth()
-                                        .fillMaxHeight(0.28125f)
-                                        .padding(16.dp),
-                                    onClick = {
-                                        navController?.navigate(ConfigScreen)
-                                    }) {
-                                    Text(
-                                        text = "Config",
-                                        color = textcolor,
-                                        fontSize = 20.sp
-                                    )
-                                }
-                */
+
+                Button(
+                    shape = ShapeDefaults.ExtraLarge,
+                    border = buttonborder,
+                    colors = buttonColor,
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxWidth()
+                        .fillMaxHeight(0.28125f)
+                        .padding(16.dp),
+                    onClick = {
+                        navController?.navigate(ConfigScreen)
+                    }) {
+                    Text(
+                        text = "Config",
+                        color = textcolor,
+                        fontSize = 20.sp
+                    )
+                }
+
 
                 Button(
                     shape = ShapeDefaults.ExtraLarge,
@@ -205,14 +205,6 @@ fun MainScreen(
                         fontSize = 20.sp
                     )
                 }
-
-                SpinnerConfig(
-                    viewModel = viewmodel,
-                    bleManager = bleManager,
-                    options,
-                    titre = "Forme du signal",
-                    modifier = Modifier.weight(1f)
-                )
 
                 Row(
                     modifier = Modifier

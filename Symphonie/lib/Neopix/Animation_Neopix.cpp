@@ -38,6 +38,7 @@ void Animation_Neopix::begin(){
 void Animation_Neopix::updateNeo(){
     if(animation != last_animation){
         last_animation = animation;
+        reverse = false;
         Mpixel = 0;
         strip.clear();
         strip.show();
@@ -84,8 +85,9 @@ void Animation_Neopix::updateNeo(){
          
 }
 void Animation_Neopix::suiveur() {
+    strip.clear();
+    // Serial.printf("key1 = %d \t, key2 = %d \t, key3 = %d \n", pressed_key[0], pressed_key[1], pressed_key[2]);
     for (int i = 0; i < 3; i++) {
-        strip.clear();
         if ((pressed_key[i] != 9999) && (pressed_key[i] < NUMPIXELS)) {
             strip.setPixelColor(pressed_key[i], strip.Color(red, green, blue));
 
@@ -97,8 +99,10 @@ void Animation_Neopix::suiveur() {
                 strip.setPixelColor(pressed_key[i] - 1, strip.Color(red, green, blue));
             }
         }
+        
     }
     strip.show();
+    
 }
 void Animation_Neopix::Ambiance() { 
     maintenant = millis();
@@ -161,10 +165,10 @@ void Animation_Neopix::colorWipeCenter(uint8_t pixel){
         if(reverse == false){
             strip.setPixelColor(milieu + 1  + pixel, strip.Color(red, green, blue));
             strip.setPixelColor(milieu - pixel, strip.Color(red, green, blue));
-        }else if(reverse == true){
+        }/* else if(reverse == true){
             strip.setPixelColor(milieu + 1 + pixel, strip.Color(0, 0, 0));
             strip.setPixelColor(milieu - 1 - pixel, strip.Color(0, 0, 0));
-        }
+        } */
         strip.show();
         Mpixel++;
     }
@@ -175,7 +179,7 @@ void Animation_Neopix::colorWipeEdge(uint8_t pixel){
         //FAIRE REVERSE
         maintenant = millis();
         if(reverse == false){
-            strip.setPixelColor(NUMPIXELS-pixel, strip.Color(red, green, blue));
+            strip.setPixelColor((NUMPIXELS)-pixel, strip.Color(red, green, blue));
             strip.setPixelColor( pixel, strip.Color(red, green, blue));
         }else if(reverse == true){
             strip.setPixelColor(NUMPIXELS - pixel, strip.Color(0, 0, 0));

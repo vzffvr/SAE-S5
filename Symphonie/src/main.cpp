@@ -30,6 +30,14 @@ void setup() {
 
 void loop() {
 
+  // if (ble_midi.IsConnected())
+  // {
+  //   digitalWrite(CONNECTION_LED, HIGH);
+  // }else{
+  //   digitalWrite(CONNECTION_LED, HIGH);
+  // }
+  
+
   memcpy(new_data, ble_midi.loopBLE(), sizeof(new_data)); // Copie des valeurs de Whats_New qui est dans loopBLE dans new_data
   ble_midi.reset_tab();
 
@@ -153,7 +161,7 @@ void add2pressed_key(uint8_t key){
       return;
     }
   }
-  Serial.printf("tab = %d \t, note = %d \t, velocity = %d \n", key_pressed[0], key_pressed[1], key_pressed[2]);
+  Serial.printf("key1 = %d \t, key2 = %d \t, key3 = %d \n", key_pressed[0], key_pressed[1], key_pressed[2]);
   Serial.println("Tableau complet maximum de touche appuye en meme temps:3");
 }
 

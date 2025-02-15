@@ -12,6 +12,12 @@ class ViewModel: ViewModel() {
     private val _isReady = MutableStateFlow(false)
     val isready = _isReady.asStateFlow()
 
+    var channel = 1
+        get() = field
+        set(value) {
+            field = value
+        }
+
 
     init {
         viewModelScope.launch {
