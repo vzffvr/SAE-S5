@@ -13,11 +13,14 @@
 #define  ROWS  5 // 5 lignes
 #define  COLS  5 // 5 colonnes
 #define NUM_FREQUENCIES 24
-// #define CONNECTION_LED 10
 
 
-byte rowPins[ROWS] = {16, 17, 18, 4, 19}; // 17 // Lignes
-byte colPins[COLS] = {13, 25, 14, 32, 33};  // Colonnes
+#define CONNECTION_LED 21
+
+byte rowPins[ROWS] = {16, 17, 18, 2, 19}; // 17 // Lignes
+
+
+byte colPins[COLS] = {13, 27, 14, 12, 33};  // Colonnes
 
 String state = "";
 

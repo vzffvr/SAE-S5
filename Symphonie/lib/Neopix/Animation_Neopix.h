@@ -4,7 +4,7 @@
 
  
 #define NUMPIXELS 144
-#define NEOPIX_PIN 23
+#define NEOPIX_PIN 22
 #define PERIODE_CWIPE 20
 #define PERIODE_POUMO 25 //EDGE
 

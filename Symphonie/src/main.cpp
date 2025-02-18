@@ -26,17 +26,16 @@ void setup() {
   oscil1.setFreq(1000.f); 
   oscil2.setFreq(1000.f); 
   oscil3.setFreq(1000.f); 
+  pinMode(CONNECTION_LED, OUTPUT);
 }
 
 void loop() {
-
-  // if (ble_midi.IsConnected())
-  // {
-  //   digitalWrite(CONNECTION_LED, HIGH);
-  // }else{
-  //   digitalWrite(CONNECTION_LED, HIGH);
-  // }
+  if(ble_midi.IsConnected())
+    digitalWrite(CONNECTION_LED, HIGH);
+  else
+    digitalWrite(CONNECTION_LED, LOW);
   
+    Serial.println(digitalRead(4));
 
   memcpy(new_data, ble_midi.loopBLE(), sizeof(new_data)); // Copie des valeurs de Whats_New qui est dans loopBLE dans new_data
   ble_midi.reset_tab();
