@@ -8,7 +8,7 @@ class ColorViewModel: ViewModel(){
 
     var animation: Int = 1
 
-    var textColor = Color(255, 255, 255, 255)
+    var textColor = Color(255, 150, 0, 255)
 
     var red10: Int = 0
     var green10: Int = 0
@@ -24,13 +24,11 @@ class ColorViewModel: ViewModel(){
     var hexCode: String = ""
 
     //TC-> Text Color
-    fun setTC(color: Color)
-    {
+    fun setTC(color: Color) {
         textColor = color
     }
 
-    fun getTC(): Color
-    {
+    fun getTC(): Color {
         return textColor
     }
 }

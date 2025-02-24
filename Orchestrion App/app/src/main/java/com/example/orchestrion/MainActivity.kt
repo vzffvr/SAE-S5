@@ -11,9 +11,12 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.animation.doOnEnd
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsControllerCompat
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -30,8 +33,9 @@ class MainActivity : ComponentActivity() {
 
     private lateinit var bleManager: BleManager
 
-    override fun onCreate(savedInstanceState: Bundle?) {
+    public val time2Rise = 1000
 
+    override fun onCreate(savedInstanceState: Bundle?) {
 
         installSplashScreen().apply {
             //Regarde la valeur de isready a chaque fois qu'une frame change sur l'ecran

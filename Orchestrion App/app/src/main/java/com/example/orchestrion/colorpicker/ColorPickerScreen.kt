@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -83,77 +84,80 @@ fun ColorPicker(
     //controller.debounceDuration = 50L
 
 
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-        //.background(Color.Black)
+    Scaffold { innerPadding ->
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+            //.background(Color.Black)
 //        .paint(
 //        painterResource(id = R.drawable.background),
 //        contentScale = ContentScale.FillHeight)
-    ) {
-
-        Column(
-            modifier = Modifier.fillMaxSize(),
-            verticalArrangement = Arrangement.Bottom,
-            horizontalAlignment = Alignment.CenterHorizontally
         ) {
 
-
-            HsvColorPicker(
+            Column(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .fillMaxHeight(0.47f)
-                    .padding(10.dp),
-                controller = controller,
-                initialColor = Color(255, 255, 255),
-                onColorChanged = { colorEnvelope: ColorEnvelope ->
-                    textColor = colorEnvelope.color
-
-                    hexCode = colorEnvelope.hexCode
-
-                    alpha10 = (colorEnvelope.color.alpha * 255).toInt()
-
-                    red10 = (colorEnvelope.color.red * 255).toInt()
-                    green10 = (colorEnvelope.color.green * 255).toInt()
-                    blue10 = (colorEnvelope.color.blue * 255).toInt()
-
-
-                    viewModel.setTC(textColor)
-
-                    animation = viewModel.animation
-                    viewModel.setColors(red10, green10,blue10)
-
-                    bleManager?.sendColorOrder(red10, green10, blue10, animation)
-                }
-            )
-
-            Spacer(modifier = Modifier.fillMaxHeight(0.1f))
-
-            BrightnessSlider(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(10.dp)
-                    .fillMaxHeight(0.1f),
-                controller = controller,
-                borderRadius = 6.dp,
-                borderSize = 5.dp,
-                borderColor = Color.LightGray,
-            )
-
-
-            Spacer(modifier = Modifier.fillMaxHeight(0.12f))
-
-            Row(
-                Modifier.fillMaxWidth(),
+                    .fillMaxSize()
+                    .padding(innerPadding),
+                verticalArrangement = Arrangement.Bottom,
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                TextPreview(red10, green10, blue10, alpha10, textColor)
-
-                Spacer(modifier = Modifier.fillMaxWidth(0.1f))
 
 
+                HsvColorPicker(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .fillMaxHeight(0.55f)
+                        .padding(10.dp),
+                    controller = controller,
+                    initialColor = textColor,
+                    onColorChanged = { colorEnvelope: ColorEnvelope ->
+                        textColor = colorEnvelope.color
+
+                        hexCode = colorEnvelope.hexCode
+
+                        alpha10 = (colorEnvelope.color.alpha * 255).toInt()
+
+                        red10 = (colorEnvelope.color.red * 255).toInt()
+                        green10 = (colorEnvelope.color.green * 255).toInt()
+                        blue10 = (colorEnvelope.color.blue * 255).toInt()
 
 
-                SpinnerAnim(viewModel, bleManager, options, "Animation")
+                        viewModel.setTC(textColor)
+
+                        animation = viewModel.animation
+                        viewModel.setColors(red10, green10, blue10)
+
+                        bleManager?.sendColorOrder(red10, green10, blue10, animation)
+                    }
+                )
+
+                Spacer(modifier = Modifier.fillMaxHeight(0.1f))
+
+                BrightnessSlider(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(10.dp)
+                        .fillMaxHeight(0.1f),
+                    controller = controller,
+                    borderRadius = 6.dp,
+                    borderSize = 5.dp,
+                    borderColor = Color.LightGray,
+                )
+
+
+                Spacer(modifier = Modifier.fillMaxHeight(0.12f))
+
+                Row(
+                    Modifier.fillMaxWidth(),
+                ) {
+                    TextPreview(red10, green10, blue10, alpha10, textColor)
+
+                    Spacer(modifier = Modifier.fillMaxWidth(0.1f))
+
+
+
+
+                    SpinnerAnim(viewModel, bleManager, options, "Animation")
 
 
 //                    Button(
@@ -188,28 +192,29 @@ fun ColorPicker(
 //
 
 
+                }
+
+                Spacer(modifier = Modifier.fillMaxHeight(0.03f))
+
+                Text(
+                    text = "#$hexCode",
+                    color = textColor,
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    modifier = Modifier.align(Alignment.CenterHorizontally),
+                )
+
+                AlphaTile(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .fillMaxHeight(0.15f),
+                    controller = controller,
+                    tileOddColor = Color.White,
+                    tileEvenColor = Color.LightGray,
+                    tileSize = 60.dp,
+                )
+
             }
-
-            Spacer(modifier = Modifier.fillMaxHeight(0.03f))
-
-            Text(
-                text = "#$hexCode",
-                color = textColor,
-                fontSize = 16.sp,
-                fontWeight = FontWeight.SemiBold,
-                modifier = Modifier.align(Alignment.CenterHorizontally),
-            )
-
-            AlphaTile(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .fillMaxHeight(0.15f),
-                controller = controller,
-                tileOddColor = Color.White,
-                tileEvenColor = Color.LightGray,
-                tileSize = 60.dp,
-            )
-
         }
     }
 }

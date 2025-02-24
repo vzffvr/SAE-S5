@@ -1,11 +1,9 @@
 package com.example.orchestrion
 
-import android.content.Context
 import android.content.res.Configuration
 import android.graphics.drawable.BitmapDrawable
 import android.util.Log
 import android.view.MotionEvent
-import android.view.OrientationEventListener
 import androidx.compose.foundation.background
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
@@ -28,11 +26,11 @@ import androidx.compose.material3.Slider
 import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -51,7 +49,6 @@ import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
@@ -60,8 +57,6 @@ import com.example.orchestrion.colorpicker.ColorViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import kotlinx.serialization.json.Json.Default.configuration
-
 
 @Preview(device = "spec:width=1600dp,height=891dp")
 @Composable
@@ -98,12 +93,12 @@ fun PianoUI(bleManager: BleManager? = null, viewModel: ColorViewModel) {
                 ) {
                     for (whiteNote in notes){
                         if (!whiteNote.endsWith("#")) {
-                            Log.d("KeyButton", "whiteNote: $whiteNote")
                             WhiteKey(
                                 text = whiteNote,
                                 color = viewModel.getTC(),
-                                onPress =
-                                { bleManager?.sendMidiMessage(1, string2Midi(whiteNote), 127, NoteON = true) },
+                                bleManager = bleManager,
+//                                onPress =
+//                                { bleManager?.sendMidiMessage(1, string2Midi(whiteNote), 127, NoteON = true) },
                                 onRelease =
                                 { bleManager?.sendMidiMessage(1, string2Midi(whiteNote), 0, NoteON = false) }
                             )
@@ -121,13 +116,12 @@ fun PianoUI(bleManager: BleManager? = null, viewModel: ColorViewModel) {
                     //
                     for (blackNote in notes){
                         if (blackNote.endsWith("#")) { // Position des touches noires
-                            Log.d("KeyButton", "blackNote: $blackNote")
                             BlackKey(
                                 text = blackNote,
                                 color = viewModel.getTC(),
-                                onPress =
-                                { bleManager?.sendMidiMessage(1, string2Midi(blackNote), 127, NoteON = true)
-                                },
+                                bleManager = bleManager,
+//                                onPress =
+//                                { bleManager?.sendMidiMessage(1, string2Midi(blackNote), 127, NoteON = true) },
                                 onRelease =
                                 { bleManager?.sendMidiMessage(1, string2Midi(blackNote), 0, NoteON = false) }
                             )
@@ -173,11 +167,13 @@ fun WhiteKey(
     onPress: () -> Unit = {},
     onRelease: () -> Unit = {},
     onHold: () -> Unit = {},
+    bleManager: BleManager?
 ) {
     var backgroundColor by remember { mutableStateOf(Color.White) }
     val coroutineScope = rememberCoroutineScope()
     var isHolding by remember { mutableStateOf(false) }
     val currentJob = remember { mutableStateOf<Job?>(null) }
+    var velocity = remember { mutableIntStateOf(0) }
 
     Button(
         onClick = {}, // Désactivé car on gère les événements manuellement
@@ -192,9 +188,11 @@ fun WhiteKey(
                             isHolding = true
                             backgroundColor = color
                             currentJob.value = coroutineScope.launch {
-                                while (isHolding) {
+                                while (isHolding && velocity.intValue < 127) {
+                                    bleManager?.sendMidiMessage(1, string2Midi(text), velocity.intValue, NoteON = true)
                                     onHold()
-                                    delay(100)
+                                    velocity.value += 6
+                                    delay(50)
                                 }
                             }
                             onPress()
@@ -206,6 +204,7 @@ fun WhiteKey(
                         isHolding = false
                         currentJob.value?.cancel()
                         backgroundColor = Color.White
+                        velocity.intValue = 0
                         onRelease()
                         true
                     }
@@ -233,34 +232,44 @@ fun BlackKey(
     color: Color = Color.Black,
     onPress: () -> Unit = {},
     onRelease: () -> Unit = {},
-    onHold: () -> Unit = {}
+    onHold: () -> Unit = {},
+    bleManager: BleManager?
 ) {
     var backgroundColor by remember { mutableStateOf(Color.Black) }
     val coroutineScope = rememberCoroutineScope()
     var isHolding by remember { mutableStateOf(false) }
     val currentJob = remember { mutableStateOf<Job?>(null) }
+    var velocity = remember { mutableIntStateOf(0) }
+    var activePointerId: Int? by remember { mutableStateOf(null) } // Stocke l'ID du pointeur actif
 
     Button(
         onClick = {}, // Désactivé car on gère les événements manuellement
         modifier = Modifier
             .width(52.dp)
             .fillMaxHeight(0.8f)
-            .offset(y = (-25).dp)      // Décalage vertical négatif de 25dp
+            .offset(y = (-25).dp)
             .pointerInteropFilter { motionEvent ->
                 when (motionEvent.actionMasked) {
                     MotionEvent.ACTION_DOWN, MotionEvent.ACTION_POINTER_DOWN -> {
-                        if (!isHolding) { // Évite de redéclencher pour la même touche
+                        // Si aucun pointeur n'est actif, on enregistre l'ID du pointeur courant
+                        if (activePointerId == null) {
+                            activePointerId = motionEvent.getPointerId(motionEvent.actionIndex)
                             isHolding = true
                             backgroundColor = color
 
-                            // D'abord, appeler onPress()
                             onPress()
 
-                            // Ensuite, démarrer la boucle onHold()
                             currentJob.value = coroutineScope.launch {
-                                while (isHolding) {
+                                while (isHolding && velocity.intValue < 127) {
                                     onHold()
-                                    delay(100)
+                                    bleManager?.sendMidiMessage(
+                                        1,
+                                        string2Midi(text),
+                                        velocity.intValue,
+                                        NoteON = true
+                                    )
+                                    velocity.value += 6
+                                    delay(50)
                                 }
                             }
                         }
@@ -268,10 +277,16 @@ fun BlackKey(
                     }
 
                     MotionEvent.ACTION_UP, MotionEvent.ACTION_POINTER_UP -> {
-                        isHolding = false
-                        currentJob.value?.cancel()
-                        backgroundColor = Color.Black
-                        onRelease()
+                        // On vérifie que le doigt relâché correspond bien à celui qui a déclenché l'appui
+                        val pointerId = motionEvent.getPointerId(motionEvent.actionIndex)
+                        if (activePointerId == pointerId) {
+                            isHolding = false
+                            activePointerId = null
+                            currentJob.value?.cancel()
+                            backgroundColor = Color.Black
+                            velocity.intValue = 0
+                            onRelease()
+                        }
                         true
                     }
 

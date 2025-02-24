@@ -17,10 +17,12 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonColors
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.ShapeDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -34,9 +36,11 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.view.WindowCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.orchestrion.colorpicker.ColorViewModel
+import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 
@@ -59,176 +63,181 @@ fun MainScreen(
     viewmodel: ColorViewModel,
     bleManager: BleManager?
 ) {
-    var buttonColor = ButtonColors(
-        Color.Transparent, Color.Black,
-        Color.Transparent, Color.Black
-    )
-    var textcolor = Color.Black
-    var buttonborder = BorderStroke(2.dp, Color.Black)
-    var logo = R.drawable.symphonie_branding_light
-    val options = listOf("Sinusoidale", "Carre", "Triangulaire")
-
-    if (isSystemInDarkTheme()) {
-        logo = R.drawable.symphonie_branding_dark
-        textcolor = Color.White
-        buttonColor = ButtonColors(
-            Color.Transparent, Color.White,
-            Color.Transparent, Color.White
+    Scaffold {  innerPadding ->
+        var buttonColor = ButtonColors(
+            Color.Transparent, Color.Black,
+            Color.Transparent, Color.Black
         )
-        buttonborder = BorderStroke(2.dp, Color.White)
-    }
+        var textcolor = Color.Black
+        var buttonborder = BorderStroke(2.dp, Color.Black)
+        var logo = R.drawable.symphonie_branding_light
+        val options = listOf("Sinusoidale", "Carre", "Triangulaire")
 
-
-    var connectedColor by remember { mutableStateOf(Color.Red) }
-    LaunchedEffect(bleManager?.isSymphonieConnected()) {
-        while (isActive) {
-            connectedColor = if (bleManager?.isSymphonieConnected() == true) {
-                Color.Green
-            } else {
-                Color.Red
-            }
-            //Log.d("BLE", "Connected: ${bleManager?.isOrchestrionConnected()} - $ConnectedColor")
-            delay(1000)
+        if (isSystemInDarkTheme()) {
+            logo = R.drawable.symphonie_branding_dark
+            textcolor = Color.White
+            buttonColor = ButtonColors(
+                Color.Transparent, Color.White,
+                Color.Transparent, Color.White
+            )
+            buttonborder = BorderStroke(2.dp, Color.White)
         }
-    }
 
-    //Background
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .wrapContentSize(Alignment.Center)
-        //.background(Color.Black)
+
+        var connectedColor by remember { mutableStateOf(Color.Red) }
+        LaunchedEffect(bleManager?.isSymphonieConnected()) {
+            while (isActive) {
+                connectedColor = if (bleManager?.isSymphonieConnected() == true) {
+                    Color.Green
+                } else {
+                    Color.Red
+                }
+                //Log.d("BLE", "Connected: ${bleManager?.isOrchestrionConnected()} - $ConnectedColor")
+                delay(1000)
+            }
+        }
+
+        //Background
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .wrapContentSize(Alignment.Center)
+                .padding(innerPadding),
+            //.background(Color.Black)
 //        .paint(
 //        painterResource(id = R.drawable.background2),
 //        contentScale = ContentScale.FillHeight)
-    ) {
-        val buttonModifier: Modifier =
-            Modifier
-                .fillMaxWidth()
-                .fillMaxHeight(0.28125f)
-                .padding(16.dp)
-
-
-
-        Column(
-            modifier = Modifier
-                .fillMaxSize(),
-            verticalArrangement = Arrangement.Top,
-            horizontalAlignment = Alignment.CenterHorizontally
         ) {
+            val buttonModifier: Modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .fillMaxHeight(0.28125f)
+                    .padding(16.dp)
 
-            Spacer(modifier = Modifier.height(70.dp))
 
-            //Logo
-            Row(
-                horizontalArrangement = Arrangement.SpaceAround,
-                modifier = Modifier
-                    .fillMaxWidth(),
-            ) {
-                Box(
-                    modifier = Modifier
-                        .paint(
-                            painterResource(logo),
-                            contentScale = ContentScale.FillWidth
-                        )
 
-                )
-            }
-
-            Spacer(modifier = Modifier.height(80.dp))
-
-            //Boutton
             Column(
                 modifier = Modifier
-                    .fillMaxHeight(),
+                    .fillMaxSize(),
+                verticalArrangement = Arrangement.Top,
                 horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(16.dp)
+
             ) {
-                Button(
-                    shape = ShapeDefaults.ExtraLarge,
-                    border = buttonborder,
-                    colors = buttonColor,
-                    modifier = Modifier
-                        .weight(1f)
-                        .fillMaxHeight(0.28125f)
-                        .fillMaxWidth()
-                        .fillMaxHeight(0.28125f)
-                        .padding(16.dp),
-                    onClick = {
-                        navController?.navigate(Piano)
-                    }
-                ) {
-                    Text(
-                        text = "Clavier",
-                        color = textcolor,
-                        fontSize = 20.sp
-                    )
-                }
 
+                Spacer(modifier = Modifier.height(70.dp))
 
-                Button(
-                    shape = ShapeDefaults.ExtraLarge,
-                    border = buttonborder,
-                    colors = buttonColor,
-                    modifier = Modifier
-                        .weight(1f)
-                        .fillMaxWidth()
-                        .fillMaxHeight(0.28125f)
-                        .padding(16.dp),
-                    onClick = {
-                        navController?.navigate(ConfigScreen)
-                    }) {
-                    Text(
-                        text = "Config",
-                        color = textcolor,
-                        fontSize = 20.sp
-                    )
-                }
-
-
-                Button(
-                    shape = ShapeDefaults.ExtraLarge,
-                    border = buttonborder,
-                    colors = buttonColor,
-                    modifier = Modifier
-                        .weight(1f)
-
-                        .fillMaxWidth()
-                        .fillMaxHeight(0.28125f)
-                        .padding(16.dp),
-                    onClick = {
-                        navController?.navigate(Colorpicker)
-                    }) {
-                    Text(
-                        text = "ColorPicker",
-                        color = viewmodel.getTC(),
-                        fontSize = 20.sp
-                    )
-                }
-
+                //Logo
                 Row(
+                    horizontalArrangement = Arrangement.SpaceAround,
                     modifier = Modifier
-                        .fillMaxWidth().weight(1f),
-                    horizontalArrangement = Arrangement.End
+                        .fillMaxWidth(),
                 ) {
+                    Box(
+                        modifier = Modifier
+                            .paint(
+                                painterResource(logo),
+                                contentScale = ContentScale.FillWidth
+                            )
+
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(80.dp))
+
+                //Boutton
+                Column(
+                    modifier = Modifier
+                        .fillMaxHeight(),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    Button(
+                        shape = ShapeDefaults.ExtraLarge,
+                        border = buttonborder,
+                        colors = buttonColor,
+                        modifier = Modifier
+                            .weight(1f)
+                            .fillMaxHeight(0.28125f)
+                            .fillMaxWidth()
+                            .fillMaxHeight(0.28125f)
+                            .padding(16.dp),
+                        onClick = {
+                            navController?.navigate(Piano)
+                        }
+                    ) {
+                        Text(
+                            text = "Clavier",
+                            color = textcolor,
+                            fontSize = 20.sp
+                        )
+                    }
+
 
                     Button(
                         shape = ShapeDefaults.ExtraLarge,
                         border = buttonborder,
                         colors = buttonColor,
                         modifier = Modifier
-                            .padding(6.dp),
+                            .weight(1f)
+                            .fillMaxWidth()
+                            .fillMaxHeight(0.28125f)
+                            .padding(16.dp),
                         onClick = {
-                            bleManager?.reconnectToESP32()
+                            navController?.navigate(ConfigScreen)
                         }) {
                         Text(
-                            text = "Reconnect",
-                            color = connectedColor,
+                            text = "Config",
+                            color = textcolor,
                             fontSize = 20.sp
                         )
                     }
-                }
 
+
+                    Button(
+                        shape = ShapeDefaults.ExtraLarge,
+                        border = buttonborder,
+                        colors = buttonColor,
+                        modifier = Modifier
+                            .weight(1f)
+
+                            .fillMaxWidth()
+                            .fillMaxHeight(0.28125f)
+                            .padding(16.dp),
+                        onClick = {
+                            navController?.navigate(Colorpicker)
+                        }) {
+                        Text(
+                            text = "ColorPicker",
+                            color = viewmodel.getTC(),
+                            fontSize = 20.sp
+                        )
+                    }
+
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .weight(1f),
+                        horizontalArrangement = Arrangement.End
+                    ) {
+
+                        Button(
+                            shape = ShapeDefaults.ExtraLarge,
+                            border = buttonborder,
+                            colors = buttonColor,
+                            modifier = Modifier
+                                .padding(6.dp),
+                            onClick = {
+                                bleManager?.reconnectToESP32()
+                            }) {
+                            Text(
+                                text = "Reconnect",
+                                color = connectedColor,
+                                fontSize = 20.sp
+                            )
+                        }
+                    }
+
+                }
             }
         }
     }

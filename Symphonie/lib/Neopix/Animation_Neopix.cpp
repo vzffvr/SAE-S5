@@ -22,8 +22,8 @@ Animation_Neopix::Animation_Neopix(void){
 
     mode = 255;
 
-    for (int i = 0; i < 3; i++){
-        pressed_key[i] = 9999;}
+    for (int i = 0; i < 3; i++)
+        pressed_key[i] = 9999;
 
     
 }
@@ -116,7 +116,7 @@ void Animation_Neopix::Ambiance() {
 
 void Animation_Neopix::Poumonage() { 
     if((millis() - maintenant >= PERIODE_POUMO) || (millis() < maintenant)){
-        Serial.println("Poumo");
+        // Serial.println("Poumo");
         maintenant = millis();
 
         for(int i = 0; i < NUMPIXELS; i++){

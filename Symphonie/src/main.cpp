@@ -11,10 +11,9 @@ uint8_t midiOrder[3] = {0};
 Keypad keypad = Keypad(makeKeymap(keys), rowPins, colPins, ROWS, COLS);
 Animation_Neopix anim;
 BLE_Midi ble_midi;
-Oscil <SIN4096_NUM_CELLS, MOZZI_AUDIO_RATE> oscil1(SIN4096_DATA);
-Oscil <SIN4096_NUM_CELLS, MOZZI_AUDIO_RATE> oscil2(SIN4096_DATA);
-Oscil <SIN4096_NUM_CELLS, MOZZI_AUDIO_RATE> oscil3(SIN4096_DATA);
-Oscil <SIN4096_NUM_CELLS, MOZZI_AUDIO_RATE> tableau[3] = {oscil1, oscil2, oscil3};
+
+Oscil<SIN4096_NUM_CELLS, MOZZI_AUDIO_RATE>* tableau[MAX_TILES_HELD];
+
 
 void setup() {
   Serial.begin(115200);
@@ -23,10 +22,21 @@ void setup() {
   anim.begin();
 
   startMozzi();
-  oscil1.setFreq(1000.f); 
-  oscil2.setFreq(1000.f); 
-  oscil3.setFreq(1000.f); 
+  for (int i = 0; i < MAX_TILES_HELD; ++i) {
+    tableau[i] = new Oscil<SIN4096_NUM_CELLS, MOZZI_AUDIO_RATE>(SIN4096_DATA);
+  }
+  // oscil1.setFreq(1000.f); 
+  // oscil2.setFreq(1000.f); 
+  // oscil3.setFreq(1000.f); 
   pinMode(CONNECTION_LED, OUTPUT);
+  digitalWrite(CONNECTION_LED, LOW);
+
+  for (int i = 0; i < MAX_TILES_HELD; i++)
+  {
+    frequencies[i] = (MAX_FREQUENCIE / MAX_TILES_HELD) * (i+1);
+    key_pressed[i] = 9999;
+  }
+  
 }
 
 void loop() {
@@ -34,8 +44,8 @@ void loop() {
     digitalWrite(CONNECTION_LED, HIGH);
   else
     digitalWrite(CONNECTION_LED, LOW);
-  
-    Serial.println(digitalRead(4));
+
+  Serial.printf("key1 = %d \t, key2 = %d \t, key3 = %d \n", key_pressed[0], key_pressed[1], key_pressed[2]);
 
   memcpy(new_data, ble_midi.loopBLE(), sizeof(new_data)); // Copie des valeurs de Whats_New qui est dans loopBLE dans new_data
   ble_midi.reset_tab();
@@ -83,16 +93,25 @@ void updateControl(){
     switch (signal_form)
     {
       case 0:
-        oscil1.setTable(SIN4096_DATA);
+        for (int i = 0; i < MAX_TILES_HELD; i++){
+          tableau[i]->setTable(SIN4096_DATA);
+        }
         break;
       case 1:
-        oscil1.setTable(SAW4096_DATA);
+        for (int i = 0; i < MAX_TILES_HELD; i++){
+          tableau[i]->setTable(SAW4096_DATA);
+        }
         break;
       case 2:
-        oscil1.setTable(TRIANGLE_DIST_CUBED_2048_DATA);
+        for (int i = 0; i < MAX_TILES_HELD; i++){
+          tableau[i]->setTable(TRIANGLE_DIST_CUBED_2048_DATA);
+        }
+        
         break;
       case 3:
-        oscil1.setTable(CHEBYSHEV_6TH_256_DATA);
+        for (int i = 0; i < MAX_TILES_HELD; i++){
+          tableau[i]->setTable(CHEBYSHEV_6TH_256_DATA);
+        }
         break;
       
       default:
@@ -104,12 +123,12 @@ void updateControl(){
   number_of_signals = 0;
   for(int i =0;i<3;i++){
     if(key_pressed[i]!=9999){
-      tableau[i].setFreq(frequencies[key_pressed[i]]); // Changement de freq
-      myAudioOutput = myAudioOutput + tableau[i].next(); // ajout dans myAudioOutput
+      tableau[i]->setFreq(frequencies[key_pressed[i]]); // Changement de freq
+      myAudioOutput = myAudioOutput + tableau[i]->next(); // ajout dans myAudioOutput
       number_of_signals++;
     }
     else
-      tableau[i].setFreq(0);
+      tableau[i]->setFreq(0);
   }
   // if(key_pressed[0]!=9999) // Changement de freq
   //   oscil1.setFreq(frequencies[key_pressed[0]]);
@@ -151,9 +170,11 @@ AudioOutput updateAudio(){
 }
 
 void add2pressed_key(uint8_t key){
-  for(int i = 0; i<3;i++){
-    if (key_pressed[i] == 9999)
-    {
+  for(int i = 0; i < MAX_TILES_HELD;i++){
+    Serial.printf("key1 = %d \t, key2 = %d \t, key3 = %d \n", key_pressed[0], key_pressed[1], key_pressed[2]);
+    if (key == key_pressed[i]){
+      return;
+   } else if (key_pressed[i] == 9999) {
       key_pressed[i] = key;
       Serial.print("add: ");
       Serial.println(key);
@@ -165,7 +186,7 @@ void add2pressed_key(uint8_t key){
 }
 
 void remove_from_pressed_key(uint8_t key){
-  for(int i = 0; i<3;i++){
+  for(int i = 0; i < MAX_TILES_HELD;i++){
     if (key_pressed[i] == key)
     {
       Serial.print("remove: ");

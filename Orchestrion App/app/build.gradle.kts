@@ -88,4 +88,6 @@ dependencies {
 
     //PhotoPicker
     implementation(libs.modernstorage.photopicker)
+
+    implementation(libs.accompanist.systemuicontroller)
 }

@@ -14,11 +14,15 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.text.input.InputTransformation.Companion.keyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.ShapeDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -95,94 +99,103 @@ fun ConfigScreen(
         }
     }
 
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Color.Black),
-        contentAlignment = Alignment.Center
-    ) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
+    Scaffold { innerPadding ->
+        Box(
+            modifier = Modifier
+                .fillMaxSize(),
+            contentAlignment = Alignment.Center
         ) {
-
-            //Logo
-            Row(
-                horizontalArrangement = Arrangement.SpaceAround,
+            Column(
                 modifier = Modifier
-                    .fillMaxWidth()
+                    .padding(innerPadding)
+                    .fillMaxSize()
+                    .verticalScroll(rememberScrollState()),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.SpaceBetween
             ) {
+
                 //Logo
-                Box(
+                Row(
                     modifier = Modifier
-                       .paint(
-                            painterResource(logo),
-                           contentScale = ContentScale.FillWidth
-                        ),
-                )
-            }
+                        .fillMaxWidth()
+                ) {
+                    //Logo
+                    Box(
+                        modifier = Modifier
+                            .paint(
+                                painterResource(logo),
+                                contentScale = ContentScale.FillWidth
+                            )
 
-            SpinnerConfig(bleManager, options, "Forme du signal", Modifier)
-            Spacer(modifier = Modifier.height(30.dp))
+                    )
+                }
+                Spacer(modifier = Modifier.weight(1f))
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center
+                ) {
+                    SpinnerConfig(bleManager, options, "Forme du signal", Modifier)
+                    var oldChannel = viewmodel.channel
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp),
+                        horizontalArrangement = Arrangement.Center,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        OutlinedTextField(
+                            modifier = Modifier
+                                .fillMaxWidth(0.8f),
+                            value = text.toString(),
+                            onValueChange = { it ->
 
-            var oldChannel = viewmodel.channel
-            OutlinedTextField(
-                value = text.toString(),
-                onValueChange = { it ->
+                                text = it.toInt()
+                            },
+                            label = { Text(text = "Channel Midi") },
+                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                            keyboardActions = KeyboardActions(
+                                onDone = {
+                                    if (text !in 0..15) {
+                                        viewmodel.channel =
+                                            text.toString().trim().replace("\n", "").toIntOrNull()!!
+                                    } else {
+                                        text = oldChannel
+                                    }
+                                }
+                            ),
 
-                    text = it.toInt()
-//                    val cleanChannel = newChannel.trim().replace("\n", "")
-//                    val intChannel = cleanChannel.toIntOrNull()
-//
-//                    if (intChannel == null || intChannel !in 0..15) {
-//                    } else {
-//                        viewmodel.channel = intChannel
-//                        text = intChannel
-//                    }
-                },
-                label = { Text(text = "Channel Midi") },
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                modifier = Modifier.fillMaxWidth(0.8f),
-                keyboardActions = KeyboardActions(
-                    onDone = {
-                        if (text !in 0..15) {
-                            viewmodel.channel = text.toString().trim().replace("\n", "").toIntOrNull()!!
-                        }else{
-                            text = oldChannel
+                            )
+                    }
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth(),
+                        horizontalArrangement = Arrangement.End
+                    ) {
+
+                        Button(
+                            shape = ShapeDefaults.ExtraLarge,
+                            border = buttonborder,
+                            colors = ButtonColors(
+                                Color.Transparent, Color.White,
+                                Color.Transparent, Color.White
+                            ),
+                            modifier = Modifier
+                                .padding(6.dp),
+                            onClick = {
+                                bleManager?.reconnectToESP32()
+                            }) {
+                            Text(
+                                text = "Reconnect",
+                                color = connectedColor,
+                                fontSize = 20.sp
+                            )
                         }
                     }
-                ),
-
-            )
-            Spacer(modifier = Modifier.height(30.dp))
-
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth(),
-                horizontalArrangement = Arrangement.End
-            ) {
-
-                Button(
-                    shape = ShapeDefaults.ExtraLarge,
-                    border = buttonborder,
-                    colors = ButtonColors(
-                        Color.Transparent, Color.White,
-                        Color.Transparent, Color.White
-                    ),
-                    modifier = Modifier
-                        .padding(6.dp),
-                    onClick = {
-                        bleManager?.reconnectToESP32()
-                    }) {
-                    Text(
-                        text = "Reconnect",
-                        color = connectedColor,
-                        fontSize = 20.sp
-                    )
                 }
             }
         }
     }
 }
-
 
