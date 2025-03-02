@@ -1,5 +1,6 @@
 package com.example.orchestrion
 
+import MelodiePlayer
 import android.animation.ObjectAnimator
 import android.app.Activity
 import android.os.Bundle
@@ -11,15 +12,15 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.animation.doOnEnd
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
-import androidx.core.view.WindowCompat
-import androidx.core.view.WindowInsetsControllerCompat
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.example.orchestrion.Screens.ConfigScreen
+import com.example.orchestrion.Screens.MainScreen
+import com.example.orchestrion.Screens.PianoUI
 import com.example.orchestrion.colorpicker.ColorPicker
 import com.example.orchestrion.colorpicker.ColorViewModel
 import com.example.orchestrion.theme.DefaultTheme
@@ -152,6 +153,10 @@ class MainActivity : ComponentActivity() {
                     composable<TestFichier> {
                         FileOperationsScreen(LocalContext.current)
                     }
+
+                    composable<Melodie> {
+                        MelodiePlayer(bleManager = bleManager)
+                    }
                 }
             }
         }
@@ -175,6 +180,9 @@ object Piano
 
 @Serializable
 object TestFichier
+
+@Serializable
+object Melodie
 
 
 

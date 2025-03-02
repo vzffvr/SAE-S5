@@ -29,7 +29,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import com.example.orchestrion.ConfigScreen
+import com.example.orchestrion.Screens.ConfigScreen
 import com.example.orchestrion.MqttClientManager
 import com.example.orchestrion.R
 import com.example.orchestrion.TextPreview
@@ -58,10 +58,10 @@ fun ImgColorPicker(
     navController: NavController?
 ) {
 
-    BackHandler()
-    {
-        navController?.navigate(ConfigScreen)
-    }
+//    BackHandler()
+//    {
+//        navController?.navigate(ConfigScreen())
+//    }
 
     var red10: Int by remember {
         mutableIntStateOf(viewModel.red10)

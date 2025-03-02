@@ -1,8 +1,7 @@
-package com.example.orchestrion
+package com.example.orchestrion.Screens
 
 import android.content.res.Configuration
 import android.graphics.drawable.BitmapDrawable
-import android.util.Log
 import android.view.MotionEvent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.horizontalScroll
@@ -53,6 +52,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
+import com.example.orchestrion.BleManager
+import com.example.orchestrion.R
 import com.example.orchestrion.colorpicker.ColorViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay

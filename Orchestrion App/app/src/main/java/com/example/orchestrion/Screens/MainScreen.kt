@@ -1,4 +1,4 @@
-package com.example.orchestrion
+package com.example.orchestrion.Screens
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.isSystemInDarkTheme
@@ -13,8 +13,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentSize
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.Scaffold
@@ -22,7 +20,6 @@ import androidx.compose.material3.ShapeDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -36,11 +33,14 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.core.view.WindowCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import com.example.orchestrion.BleManager
+import com.example.orchestrion.Colorpicker
+import com.example.orchestrion.Melodie
+import com.example.orchestrion.Piano
+import com.example.orchestrion.R
 import com.example.orchestrion.colorpicker.ColorViewModel
-import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 
@@ -183,7 +183,7 @@ fun MainScreen(
                             .fillMaxHeight(0.28125f)
                             .padding(16.dp),
                         onClick = {
-                            navController?.navigate(ConfigScreen)
+                            navController?.navigate(com.example.orchestrion.ConfigScreen)
                         }) {
                         Text(
                             text = "Config",
@@ -208,6 +208,26 @@ fun MainScreen(
                         }) {
                         Text(
                             text = "ColorPicker",
+                            color = viewmodel.getTC(),
+                            fontSize = 20.sp
+                        )
+                    }
+
+                    Button(
+                        shape = ShapeDefaults.ExtraLarge,
+                        border = buttonborder,
+                        colors = buttonColor,
+                        modifier = Modifier
+                            .weight(1f)
+
+                            .fillMaxWidth()
+                            .fillMaxHeight(0.28125f)
+                            .padding(16.dp),
+                        onClick = {
+                            navController?.navigate(Melodie)
+                        }) {
+                        Text(
+                            text = "Melodie",
                             color = viewmodel.getTC(),
                             fontSize = 20.sp
                         )
