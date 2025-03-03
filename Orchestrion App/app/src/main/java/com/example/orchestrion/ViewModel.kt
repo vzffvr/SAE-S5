@@ -12,11 +12,9 @@ class ViewModel: ViewModel() {
     private val _isReady = MutableStateFlow(false)
     val isready = _isReady.asStateFlow()
 
-    var channel = 1
-        get() = field
-        set(value) {
-            field = value
-        }
+
+
+    val notes = mutableListOf("C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B", "C2", "C2#", "D2", "D2#", "E2", "F2", "F2#", "G2", "G2#", "A2", "A2#", "B2")
 
 
     init {

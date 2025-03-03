@@ -1,5 +1,6 @@
 package com.example.orchestrion.Screens
 
+import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
@@ -7,12 +8,15 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.text.input.InputTransformation.Companion.keyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonColors
@@ -34,6 +38,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -41,11 +46,13 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.orchestrion.BleManager
+import com.example.orchestrion.Melodie
 import com.example.orchestrion.R
 import com.example.orchestrion.SpinnerConfig
 import com.example.orchestrion.ViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
+import sendAllNotesOff
 
 @Preview
 @Composable
@@ -66,7 +73,6 @@ fun ConfigScreen(
     bleManager: BleManager?
 ) {
     val context = LocalContext.current
-    var text by remember { mutableIntStateOf(viewmodel.channel) }
     val options = listOf("Sinusoidale", "Carre", "Triangulaire")
     var buttonColor = ButtonColors(
         Color.Transparent, Color.Black,
@@ -99,80 +105,103 @@ fun ConfigScreen(
     }
 
     Scaffold { innerPadding ->
-        Box(
+        Column(
             modifier = Modifier
-                .fillMaxSize(),
-            contentAlignment = Alignment.Center
+                .fillMaxSize()
+                .padding(innerPadding)
         ) {
-            Column(
+            // Partie supérieure : le logo reste en haut
+            Row(
                 modifier = Modifier
-                    .padding(innerPadding)
-                    .fillMaxSize()
-                    .verticalScroll(rememberScrollState()),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.SpaceBetween
+                    .fillMaxWidth(),
+                horizontalArrangement = Arrangement.Center
             ) {
-
-                //Logo
-                Row(
+                Box(
                     modifier = Modifier
+                        .paint(
+                            painterResource(logo),
+                            contentScale = ContentScale.FillWidth
+                        )
                         .fillMaxWidth()
-                ) {
-                    //Logo
-                    Box(
-                        modifier = Modifier
-                            .paint(
-                                painterResource(logo),
-                                contentScale = ContentScale.FillWidth
-                            )
+                )
+            }
+            // Espace optionnel entre le logo et la partie centrale
+            Spacer(modifier = Modifier.height(16.dp))
 
-                    )
-                }
-                Spacer(modifier = Modifier.weight(1f))
+            // Partie centrale : les widgets sont centrés dans l'espace restant
+            Box(
+                modifier = Modifier
+                    .fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
                 Column(
                     modifier = Modifier
-                        .fillMaxWidth(),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.Center
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    SpinnerConfig(bleManager, options, "Forme du signal", Modifier)
-                    var oldChannel = viewmodel.channel
                     Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(16.dp),
+                        modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.Center,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        OutlinedTextField(
-                            modifier = Modifier
-                                .fillMaxWidth(0.8f),
-                            value = text.toString(),
-                            onValueChange = { it ->
+                        var text by remember { mutableStateOf(bleManager?.channel.toString()) }
+                        var oldChannel by remember { mutableStateOf(bleManager?.channel.toString()) }
 
-                                text = it.toInt()
+                        OutlinedTextField(
+                            modifier = Modifier.fillMaxWidth(0.8f),
+                            value = text,
+                            onValueChange = { newText ->
+                                // Filtrer pour ne garder que les chiffres
+                                if (newText.all { it.isDigit() }) {
+                                    text = newText
+                                }
                             },
                             label = { Text(text = "Channel Midi") },
-                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                            keyboardOptions = KeyboardOptions(
+                                keyboardType = KeyboardType.Number,
+                                imeAction = ImeAction.Done
+                            ),
                             keyboardActions = KeyboardActions(
                                 onDone = {
-                                    if (text !in 0..15) {
-                                        viewmodel.channel =
-                                            text.toString().trim().replace("\n", "").toIntOrNull()!!
+                                    val number = text.toIntOrNull()
+                                    if (number != null && number in 1..16) {
+                                        if (bleManager != null) {
+                                            bleManager.channel = number
+                                        }
+                                        oldChannel = text // Sauvegarde la valeur correcte
                                     } else {
-                                        text = oldChannel
+                                        text = oldChannel // Restaure l'ancienne valeur valide
+                                        Toast.makeText(context, "Valeur incorrecte", Toast.LENGTH_SHORT).show()
                                     }
                                 }
-                            ),
-
                             )
+                        )
                     }
-                    Row(
+                    Spacer(modifier = Modifier.height(16.dp))
+                    SpinnerConfig(bleManager, options, "Forme du signal", Modifier)
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Button(
+                        shape = ShapeDefaults.ExtraLarge,
+                        border = buttonborder,
+                        colors = buttonColor,
                         modifier = Modifier
-                            .fillMaxWidth(),
+                            .fillMaxWidth()
+                            .padding(vertical = 16.dp),
+                        onClick = {
+                            bleManager?.let { sendAllNotesOff(it) }
+                        }
+                    ) {
+                        Text(
+                            text = "Reset des touches appuyées",
+                            fontSize = 20.sp
+                        )
+                    }
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.End
                     ) {
-
                         Button(
                             shape = ShapeDefaults.ExtraLarge,
                             border = buttonborder,
@@ -180,11 +209,11 @@ fun ConfigScreen(
                                 Color.Transparent, Color.White,
                                 Color.Transparent, Color.White
                             ),
-                            modifier = Modifier
-                                .padding(6.dp),
+                            modifier = Modifier.padding(6.dp),
                             onClick = {
                                 bleManager?.reconnectToESP32()
-                            }) {
+                            }
+                        ) {
                             Text(
                                 text = "Reconnect",
                                 color = connectedColor,

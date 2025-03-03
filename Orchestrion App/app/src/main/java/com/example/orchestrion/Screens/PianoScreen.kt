@@ -54,6 +54,7 @@ import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import com.example.orchestrion.BleManager
 import com.example.orchestrion.R
+import com.example.orchestrion.ViewModel
 import com.example.orchestrion.colorpicker.ColorViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -63,14 +64,13 @@ import kotlinx.coroutines.launch
 @Composable
 fun PreviewPiano() {
     PianoUI(
-        viewModel = ColorViewModel()
+        colorViewModel = ColorViewModel(),
+        viewModel = ViewModel()
     )
 }
 
 @Composable
-fun PianoUI(bleManager: BleManager? = null, viewModel: ColorViewModel) {
-
-    val notes = mutableListOf("C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B", "C2", "C2#", "D2", "D2#", "E2", "F2", "F2#", "G2", "G2#", "A2", "A2#", "B2")
+fun PianoUI(bleManager: BleManager? = null, colorViewModel: ColorViewModel, viewModel: ViewModel) {
 
 
     Column(
@@ -92,16 +92,16 @@ fun PianoUI(bleManager: BleManager? = null, viewModel: ColorViewModel) {
                         .fillMaxSize()
                         .align(Alignment.BottomCenter)
                 ) {
-                    for (whiteNote in notes){
+                    for (whiteNote in viewModel.notes){
                         if (!whiteNote.endsWith("#")) {
                             WhiteKey(
                                 text = whiteNote,
-                                color = viewModel.getTC(),
+                                color = colorViewModel.getTC(),
                                 bleManager = bleManager,
 //                                onPress =
 //                                { bleManager?.sendMidiMessage(1, string2Midi(whiteNote), 127, NoteON = true) },
                                 onRelease =
-                                { bleManager?.sendMidiMessage(1, string2Midi(whiteNote), 0, NoteON = false) }
+                                { bleManager?.sendMidiMessage(bleManager.channel, string2Midi(whiteNote), 0, NoteON = false) }
                             )
                         }
                     }
@@ -115,16 +115,16 @@ fun PianoUI(bleManager: BleManager? = null, viewModel: ColorViewModel) {
                 ) {
                     Spacer(Modifier.width(48.dp))
                     //
-                    for (blackNote in notes){
+                    for (blackNote in viewModel.notes){
                         if (blackNote.endsWith("#")) { // Position des touches noires
                             BlackKey(
                                 text = blackNote,
-                                color = viewModel.getTC(),
+                                color = colorViewModel.getTC(),
                                 bleManager = bleManager,
 //                                onPress =
 //                                { bleManager?.sendMidiMessage(1, string2Midi(blackNote), 127, NoteON = true) },
                                 onRelease =
-                                { bleManager?.sendMidiMessage(1, string2Midi(blackNote), 0, NoteON = false) }
+                                { bleManager?.sendMidiMessage(bleManager.channel, string2Midi(blackNote), 0, NoteON = false) }
                             )
                             if (blackNote.startsWith("D")||blackNote.startsWith("A") && !blackNote.startsWith("A2")) {
                                 Spacer(Modifier.width(96.dp))
@@ -190,7 +190,7 @@ fun WhiteKey(
                             backgroundColor = color
                             currentJob.value = coroutineScope.launch {
                                 while (isHolding && velocity.intValue < 127) {
-                                    bleManager?.sendMidiMessage(1, string2Midi(text), velocity.intValue, NoteON = true)
+                                    bleManager?.sendMidiMessage(bleManager.channel, string2Midi(text), velocity.intValue, NoteON = true)
                                     onHold()
                                     velocity.value += 6
                                     delay(50)
@@ -264,7 +264,7 @@ fun BlackKey(
                                 while (isHolding && velocity.intValue < 127) {
                                     onHold()
                                     bleManager?.sendMidiMessage(
-                                        1,
+                                        bleManager.channel,
                                         string2Midi(text),
                                         velocity.intValue,
                                         NoteON = true

@@ -160,9 +160,9 @@ private suspend fun playMelody(melody: Melody, bleManager: BleManager) {
     }
 }
 
-private fun sendAllNotesOff(bleManager: BleManager) {
+fun sendAllNotesOff(bleManager: BleManager) {
     // Envoie un Note OFF pour toutes les notes possibles
-    repeat(128) { note ->
+    repeat(32) { note ->
         bleManager.sendMidiMessage(1, note, 0, false)
     }
 }

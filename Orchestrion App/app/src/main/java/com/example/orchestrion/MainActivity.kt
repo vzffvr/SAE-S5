@@ -147,7 +147,8 @@ class MainActivity : ComponentActivity() {
                     composable<Piano> {
                         PianoUI(
                             bleManager = bleManager,
-                            viewModel = colorViewModel
+                            colorViewModel = colorViewModel,
+                            viewModel = viewModel
                         )
                     }
                     composable<TestFichier> {

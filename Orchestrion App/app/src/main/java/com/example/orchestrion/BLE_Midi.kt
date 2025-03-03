@@ -47,6 +47,8 @@ class BleManager(){
 
     private val REQUEST_ENABLE_BT = 1
 
+    var channel = 1
+
     private val bluetoothAdapter: BluetoothAdapter? by lazy {
         val bluetoothManager =
             context.getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
