@@ -19,7 +19,7 @@
 #define CONNECTION_LED 21
 
 byte rowPins[ROWS] = {16, 17, 18, 4, 19}; // 17 // Lignes
-
+//18, 17, 4, ,16 ,19
 
 byte colPins[COLS] = {13, 27, 14, 12, 33};  // Colonnes
 
@@ -28,7 +28,7 @@ String state = "";
 int key_pressed[MAX_TILES_HELD];
 
 char keys[ROWS][COLS] = {
-  {'0', '1', '2', '3', '3'},  //Premiere octave [C;B]
+  {'0', '1', '2', '3', 'p'},  //Premiere octave [C;B]
   {'4','5', '6', '7', '8'},
   { '9','A', 'B', 'C', 'D'},  //Deuxieme de C2 B2
   { 'E', 'F', 'G', 'H', 'I'},
