@@ -156,7 +156,10 @@ class MainActivity : ComponentActivity() {
                     }
 
                     composable<Melodie> {
-                        MelodiePlayer(bleManager = bleManager)
+                        MelodiePlayer(
+                            bleManager = bleManager,
+                            navController = navController
+                        )
                     }
                 }
             }

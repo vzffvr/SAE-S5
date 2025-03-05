@@ -14,6 +14,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
 import com.example.orchestrion.BleManager
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -31,7 +32,7 @@ data class Note(
 )
 
 @Composable
-fun MelodiePlayer(bleManager: BleManager) {
+fun MelodiePlayer(bleManager: BleManager, navController: NavController) {
 
     val scope = rememberCoroutineScope()
     var playbackJob by remember { mutableStateOf<Job?>(null) }
@@ -86,6 +87,7 @@ fun MelodiePlayer(bleManager: BleManager) {
     )
 
     BackHandler {
+        navController.navigateUp()
         playbackJob?.cancel()
         sendAllNotesOff(bleManager)
         isPlaying = false
