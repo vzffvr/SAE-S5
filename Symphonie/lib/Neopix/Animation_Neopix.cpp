@@ -23,7 +23,7 @@ Animation_Neopix::Animation_Neopix(void){
     mode = 255;
 
     for (int i = 0; i < 3; i++)
-        pressed_key[i] = 9999;
+        pressed_key[i] = 255;
 
     
 }
@@ -198,7 +198,7 @@ void Animation_Neopix::setStripColor(uint8_t tab[]){
     animation = tab[3];
 }
 
-void Animation_Neopix::setKeys(int tab[]){
+void Animation_Neopix::setKeys(uint8_t tab[]){
     pressed_key[0] = tab[0];
     pressed_key[1] = tab[1];
     pressed_key[2] = tab[2];

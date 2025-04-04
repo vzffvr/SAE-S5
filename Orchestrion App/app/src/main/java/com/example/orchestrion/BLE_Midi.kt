@@ -21,7 +21,7 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import java.util.UUID
 
-class BleManager(){
+class BleManager() {
     private lateinit var context: Context
 
     constructor(_context: Context) : this() {
@@ -41,6 +41,7 @@ class BleManager(){
     private var midiWriteCharacteristic: BluetoothGattCharacteristic? = null
     private var colorWriteCharacteristic: BluetoothGattCharacteristic? = null
     private var genericWriteCharacteristic: BluetoothGattCharacteristic? = null
+    private var ResetTabWriteCharacteristic: BluetoothGattCharacteristic? = null
     private var scanning = false
     private val handler = Handler()
     private val SCAN_PERIOD: Long = 10000 // 10 secondes
@@ -48,6 +49,7 @@ class BleManager(){
     private val REQUEST_ENABLE_BT = 1
 
     var channel = 1
+    var resetTab = 1
 
     private val bluetoothAdapter: BluetoothAdapter? by lazy {
         val bluetoothManager =
@@ -122,11 +124,14 @@ class BleManager(){
                     UUID.fromString("12345678-1234-5678-1234-56789ABCDEF0")
                 val genericCharacteristicUUID =
                     UUID.fromString("12345678-5678-9012-3456-56789ABCDEF0")
+                val ResetTabCharacteristicUUID =
+                    UUID.fromString("12345678-5678-9012-9123-56789ABCDEF0")
 
                 val service = gatt.getService(serviceUUID)
                 midiWriteCharacteristic = service?.getCharacteristic(midiCharacteristicUUID)
                 colorWriteCharacteristic = service?.getCharacteristic(colorCharacteristicUUID)
                 genericWriteCharacteristic = service?.getCharacteristic(genericCharacteristicUUID)
+                ResetTabWriteCharacteristic = service?.getCharacteristic(ResetTabCharacteristicUUID)
 
                 if (midiWriteCharacteristic != null) {
                     Log.d("BLE", "Caractéristique midi trouvée, prête à écrire")
@@ -142,6 +147,11 @@ class BleManager(){
 
                 if (genericWriteCharacteristic != null) {
                     Log.d("BLE", "Caractéristique generic trouvée, prête à écrire")
+                } else {
+                    Log.e("BLE", "Caractéristique generic non trouvée")
+                }
+                if (ResetTabWriteCharacteristic != null) {
+                    Log.d("BLE", "Caractéristique Reset trouvée, prête à écrire")
                 } else {
                     Log.e("BLE", "Caractéristique generic non trouvée")
                 }
@@ -206,7 +216,7 @@ class BleManager(){
         var noteByte: Byte = note?.toByte() ?: 9999.toByte()
         val velocityByte = velocity.toByte() //Velocity
 
-        if(NoteON)
+        if (NoteON)
             statusByte = (0x90 + (channel - 1)).toByte()
 
         val midiPacket = byteArrayOf(0x90.toByte(), statusByte, noteByte, velocityByte)
@@ -252,5 +262,18 @@ class BleManager(){
         bluetoothGatt?.writeCharacteristic(genericWriteCharacteristic)
 
         Log.d("BLE", "Message envoyé: $Content1,\t $Content2, \t $Content3, \t $Content4")
+    }
+
+    @SuppressLint("MissingPermission")
+    fun sendTabReset() {
+
+        val ResetPacket =
+            byteArrayOf(0x00.toByte(), 99.toByte(), resetTab.toByte(), 0.toByte(), 0.toByte())
+        resetTab += 1
+        genericWriteCharacteristic?.value = ResetPacket
+
+        bluetoothGatt?.writeCharacteristic(genericWriteCharacteristic)
+
+        Log.d("BLE", "Message envoyé:Tab Reseted")
     }
 }

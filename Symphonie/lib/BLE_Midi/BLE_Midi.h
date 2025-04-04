@@ -12,6 +12,7 @@
 #define CHARACTERISTIC_MIDI_UUID "7772E5DB-3868-4112-A1A9-F2669D106BF3" // UUID Midi
 #define CHARACTERISTIC_COLOR_UUID "12345678-1234-5678-1234-56789ABCDEF0" 
 #define CHARACTERISTIC_GENERIC_UUID "12345678-5678-9012-3456-56789ABCDEF0" 
+#define CHARACTERISTIC_RESET_TAB_UUID "12345678-5678-9012-9123-56789ABCDEF0" 
 
 #define PERIODE 100
 
@@ -20,7 +21,8 @@ enum NEW_MSG{
     No_New_Msg,
     MIDI,
     Color,
-    Generic
+    Generic,
+    ResetTab
 };
 
 class BLE_Midi
@@ -31,9 +33,10 @@ private:
     ColorCharacteristicCallbacks ColorCallBack;
     MidiCharacteristicCallbacks MidiCallBack;
     GenericCharacteristicCallbacks GenericCallBack;
+    // ResetTabCharacteristicCallbacks ResetTabCallBack;
 
     uint32_t maintenant_loop;
-    NEW_MSG WhatsNew[3] = {No_New_Msg};
+    NEW_MSG WhatsNew[4] = {No_New_Msg};
 
 public:
     BLE_Midi(); // Déclaration du constructeur
@@ -46,6 +49,7 @@ public:
     uint8_t getSignal();
     bool IsConnected();
     void reset_tab();
+    bool getResetMsg();
 };
 
 #endif

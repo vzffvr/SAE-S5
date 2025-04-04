@@ -43,6 +43,14 @@ void BLE_Midi::initBLE()
         // BLECharacteristic::PROPERTY_NOTIFY
     );
 
+    // BLECharacteristic *ResetTabCharacteristic;
+    // ResetTabCharacteristic = pService->createCharacteristic(
+    //     CHARACTERISTIC_RESET_TAB_UUID,
+    //     BLECharacteristic::PROPERTY_READ |
+    //     BLECharacteristic::PROPERTY_WRITE 
+    //     // BLECharacteristic::PROPERTY_NOTIFY
+    // );
+
     // Définir la valeur initiale de la caractéristique comme une chaîne vide
     // midiCharacteristic->setValue(midi_message.c_str());
     // colorCharacteristic->setValue(color_order.c_str());
@@ -52,11 +60,13 @@ void BLE_Midi::initBLE()
     ColorCallBack = ColorCharacteristicCallbacks();
     MidiCallBack = MidiCharacteristicCallbacks();
     GenericCallBack = GenericCharacteristicCallbacks();
+    // ResetTabCallBack = ResetTabCharacteristicCallbacks();
 
     pServer->setCallbacks(&ServerCallback);
     midiCharacteristic->setCallbacks(&MidiCallBack);
     colorCharacteristic->setCallbacks(&ColorCallBack);
     genericCharacteristic->setCallbacks(&GenericCallBack);
+    // ResetTabCharacteristic->setCallbacks(&ResetTabCallBack);
 
     // Démarrer le service
     pService->start();    
@@ -89,6 +99,11 @@ NEW_MSG* BLE_Midi::loopBLE(){
                 WhatsNew[2] = Generic;
             }else 
                 WhatsNew[2] = {No_New_Msg};
+            // if (ResetTabCallBack.getUpdate()){
+            //     ResetTabCallBack.setUpdate(false);
+            //     WhatsNew[3] = ResetTab;
+            // }else 
+            //     WhatsNew[3] = {No_New_Msg};
         }else
             Serial.println("Not Connected");
     }
@@ -106,6 +121,10 @@ uint8_t* BLE_Midi::getMidiOrder(){
 
 uint8_t BLE_Midi::getSignal(){
     return GenericCallBack.getSignal();
+}
+
+bool BLE_Midi::getResetMsg(){
+    return GenericCallBack.GetResetMsg();
 }
 
 bool BLE_Midi::IsConnected(){

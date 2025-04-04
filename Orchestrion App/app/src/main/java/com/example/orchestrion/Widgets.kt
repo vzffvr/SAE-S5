@@ -16,7 +16,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
@@ -116,7 +115,7 @@ fun SpinnerAnim(
                             options.indexOf(option) + 1
                         )
                     },
-                    contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding, 
+                    contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding,
                 )
             }
         }
@@ -176,7 +175,7 @@ fun SpinnerConfig(
                         text = option
                         expanded = false
                         bleManager?.sendGenericOrder(
-                            options.indexOf(option) + 1,
+                            options.indexOf(option),
                             0,
                             0,
                             0

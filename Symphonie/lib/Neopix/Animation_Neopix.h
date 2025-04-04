@@ -22,8 +22,9 @@ class Animation_Neopix{
         AUTO,
         SEMI_AUTO
     };
+
     uint8_t mode;
-    int pressed_key[3];
+    uint8_t pressed_key[3];
     uint32_t maintenant;
     bool reverse_poumo;
     uint8_t intensite_poumo;
@@ -44,7 +45,7 @@ class Animation_Neopix{
     Animation_Neopix(); 
     void begin();
     void setStripColor(uint8_t tab[]);
-    void setKeys(int tab[]);
+    void setKeys(uint8_t tab[]);
     void updateNeo();
     
 };

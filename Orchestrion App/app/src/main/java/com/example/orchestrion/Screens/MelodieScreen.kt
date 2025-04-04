@@ -38,58 +38,69 @@ fun MelodiePlayer(bleManager: BleManager, navController: NavController) {
     var playbackJob by remember { mutableStateOf<Job?>(null) }
     var currentMelody by remember { mutableStateOf<Melody?>(null) }
     var isPlaying by remember { mutableStateOf(false) }
+    var ResetTab = 1;
 
     val melodies = listOf(
-        Melody("Baby Shark", listOf(
-            Note(24, 300), Note(24, 300), Note(24, 300), // DO1
-            Note(36, 600), // DO2
-            Note(24, 300), Note(24, 300), Note(24, 300),
-            Note(36, 600)
-        )),
-        Melody("Super Mario", listOf(
-            Note(24, 150), Note(24, 150), Note(24, 150), // DO1
-            Note(19, 150), // FA0
-            Note(21, 150), // SOL0
-            Note(24, 300), Note(28, 300), // DO1, MI1
-            Note(19, 150), Note(19, 150), Note(19, 150)
-        )),
-        Melody("Star Wars", listOf(
-            Note(24, 500), Note(24, 500), Note(24, 500), // DO1
-            Note(36, 400), // DO2
-            Note(33, 150), // LA1
-            Note(31, 150), // SOL#1
-            Note(29, 150), // FA#1
-            Note(28, 400)  // MI1
-        )),
-        Melody("Pirates", listOf(
-            Note(24, 200), Note(28, 200), Note(31, 200), // DO1, MI1, SOL#1
-            Note(24, 200), Note(28, 200), Note(31, 200),
-            Note(24, 400), Note(31, 400)
-        )),
-        Melody("Pirates des Caraïbes", listOf(
-            Note(24, 200), Note(28, 200), Note(31, 200),
-            Note(24, 200), Note(28, 200), Note(31, 200),
-            Note(24, 400), Note(31, 400),
+        Melody(
+            "Baby Shark", listOf(
+                Note(24, 300), Note(24, 300), Note(24, 300), // DO1
+                Note(36, 600), // DO2
+                Note(24, 300), Note(24, 300), Note(24, 300),
+                Note(36, 600)
+            )
+        ),
+        Melody(
+            "Super Mario", listOf(
+                Note(24, 150), Note(24, 150), Note(24, 150), // DO1
+                Note(19, 150), // FA0
+                Note(21, 150), // SOL0
+                Note(24, 300), Note(28, 300), // DO1, MI1
+                Note(19, 150), Note(19, 150), Note(19, 150)
+            )
+        ),
+        Melody(
+            "Star Wars", listOf(
+                Note(24, 500), Note(24, 500), Note(24, 500), // DO1
+                Note(36, 400), // DO2
+                Note(33, 150), // LA1
+                Note(31, 150), // SOL#1
+                Note(29, 150), // FA#1
+                Note(28, 400)  // MI1
+            )
+        ),
+        Melody(
+            "Pirates", listOf(
+                Note(24, 200), Note(28, 200), Note(31, 200), // DO1, MI1, SOL#1
+                Note(24, 200), Note(28, 200), Note(31, 200),
+                Note(24, 400), Note(31, 400)
+            )
+        ),
+        Melody(
+            "Pirates des Caraïbes", listOf(
+                Note(24, 200), Note(28, 200), Note(31, 200),
+                Note(24, 200), Note(28, 200), Note(31, 200),
+                Note(24, 400), Note(31, 400),
 
-            Note(26, 200), Note(29, 200), Note(33, 200),
-            Note(26, 200), Note(29, 200), Note(33, 200),
-            Note(26, 400), Note(33, 400),
+                Note(26, 200), Note(29, 200), Note(33, 200),
+                Note(26, 200), Note(29, 200), Note(33, 200),
+                Note(26, 400), Note(33, 400),
 
-            Note(28, 200), Note(31, 200), Note(36, 200),
-            Note(28, 200), Note(31, 200), Note(36, 200),
-            Note(28, 400), Note(36, 400),
+                Note(28, 200), Note(31, 200), Note(36, 200),
+                Note(28, 200), Note(31, 200), Note(36, 200),
+                Note(28, 400), Note(36, 400),
 
-            Note(26, 200), Note(29, 200), Note(33, 200),
-            Note(26, 200), Note(29, 200), Note(33, 200),
-            Note(26, 400), Note(33, 400)
-        )),
+                Note(26, 200), Note(29, 200), Note(33, 200),
+                Note(26, 200), Note(29, 200), Note(33, 200),
+                Note(26, 400), Note(33, 400)
+            )
+        ),
 
-    )
+        )
 
     BackHandler {
         navController.navigateUp()
         playbackJob?.cancel()
-        sendAllNotesOff(bleManager)
+        bleManager.sendTabReset()
         isPlaying = false
     }
 
@@ -132,7 +143,7 @@ fun MelodiePlayer(bleManager: BleManager, navController: NavController) {
             Button(
                 onClick = {
                     playbackJob?.cancel()
-                    sendAllNotesOff(bleManager)
+                    bleManager.sendTabReset()
                     isPlaying = false
                 }
             ) {
@@ -162,9 +173,4 @@ private suspend fun playMelody(melody: Melody, bleManager: BleManager) {
     }
 }
 
-fun sendAllNotesOff(bleManager: BleManager) {
-    // Envoie un Note OFF pour toutes les notes possibles
-    repeat(32) { note ->
-        bleManager.sendMidiMessage(1, note, 0, false)
-    }
-}
+

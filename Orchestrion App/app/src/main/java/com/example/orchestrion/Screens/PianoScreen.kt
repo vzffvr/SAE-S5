@@ -57,7 +57,6 @@ import com.example.orchestrion.R
 import com.example.orchestrion.ViewModel
 import com.example.orchestrion.colorpicker.ColorViewModel
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 @Preview(device = "spec:width=1600dp,height=891dp")
@@ -92,16 +91,29 @@ fun PianoUI(bleManager: BleManager? = null, colorViewModel: ColorViewModel, view
                         .fillMaxSize()
                         .align(Alignment.BottomCenter)
                 ) {
-                    for (whiteNote in viewModel.notes){
+                    for (whiteNote in viewModel.notes) {
                         if (!whiteNote.endsWith("#")) {
                             WhiteKey(
                                 text = whiteNote,
                                 color = colorViewModel.getTC(),
                                 bleManager = bleManager,
-//                                onPress =
-//                                { bleManager?.sendMidiMessage(1, string2Midi(whiteNote), 127, NoteON = true) },
+                                onPress = {
+                                    bleManager?.sendMidiMessage(
+                                        1,
+                                        string2Midi(whiteNote),
+                                        127,
+                                        NoteON = true
+                                    )
+                                },
                                 onRelease =
-                                { bleManager?.sendMidiMessage(bleManager.channel, string2Midi(whiteNote), 0, NoteON = false) }
+                                {
+                                    bleManager?.sendMidiMessage(
+                                        bleManager.channel,
+                                        string2Midi(whiteNote),
+                                        0,
+                                        NoteON = false
+                                    )
+                                }
                             )
                         }
                     }
@@ -115,20 +127,37 @@ fun PianoUI(bleManager: BleManager? = null, colorViewModel: ColorViewModel, view
                 ) {
                     Spacer(Modifier.width(48.dp))
                     //
-                    for (blackNote in viewModel.notes){
+                    for (blackNote in viewModel.notes) {
                         if (blackNote.endsWith("#")) { // Position des touches noires
                             BlackKey(
                                 text = blackNote,
                                 color = colorViewModel.getTC(),
                                 bleManager = bleManager,
-//                                onPress =
-//                                { bleManager?.sendMidiMessage(1, string2Midi(blackNote), 127, NoteON = true) },
+                                onPress =
+                                {
+                                    bleManager?.sendMidiMessage(
+                                        1,
+                                        string2Midi(blackNote),
+                                        127,
+                                        NoteON = true
+                                    )
+                                },
                                 onRelease =
-                                { bleManager?.sendMidiMessage(bleManager.channel, string2Midi(blackNote), 0, NoteON = false) }
+                                {
+                                    bleManager?.sendMidiMessage(
+                                        bleManager.channel,
+                                        string2Midi(blackNote),
+                                        0,
+                                        NoteON = false
+                                    )
+                                }
                             )
-                            if (blackNote.startsWith("D")||blackNote.startsWith("A") && !blackNote.startsWith("A2")) {
+                            if (blackNote.startsWith("D") || blackNote.startsWith("A") && !blackNote.startsWith(
+                                    "A2"
+                                )
+                            ) {
                                 Spacer(Modifier.width(96.dp))
-                            }else
+                            } else
                                 Spacer(Modifier.width(22.dp))
                         }
                     }
@@ -149,14 +178,14 @@ fun string2Midi(note: String): Int? {
     if (match != null) {
         var octave = 1
         val (notePart, octavePart, sharpPart) = match.destructured
-        octave = if(octavePart.isEmpty())
+        octave = if (octavePart.isEmpty())
             1
         else
             octavePart.toInt()
 
-        return noteMap[notePart]?.let{it + octave * 12 + if (sharpPart.isNotEmpty()) 1 else 0}
+        return noteMap[notePart]?.let { it + octave * 12 + if (sharpPart.isNotEmpty()) 1 else 0 }
 
-    }else
+    } else
         return 99999
 }
 
@@ -188,14 +217,19 @@ fun WhiteKey(
                         if (!isHolding) { // Évite de redéclencher pour la même touche
                             isHolding = true
                             backgroundColor = color
-                            currentJob.value = coroutineScope.launch {
-                                while (isHolding && velocity.intValue < 127) {
-                                    bleManager?.sendMidiMessage(bleManager.channel, string2Midi(text), velocity.intValue, NoteON = true)
-                                    onHold()
-                                    velocity.value += 6
-                                    delay(50)
-                                }
-                            }
+//                            currentJob.value = coroutineScope.launch {
+//                                while (isHolding && velocity.intValue < 127) {
+//                                    bleManager?.sendMidiMessage(
+//                                        bleManager.channel,
+//                                        string2Midi(text),
+//                                        velocity.intValue,
+//                                        NoteON = true
+//                                    )
+//                                    onHold()
+//                                    velocity.value += 6
+//                                    delay(50)
+//                                }
+//                            }
                             onPress()
                         }
                         true
@@ -260,19 +294,19 @@ fun BlackKey(
 
                             onPress()
 
-                            currentJob.value = coroutineScope.launch {
-                                while (isHolding && velocity.intValue < 127) {
-                                    onHold()
-                                    bleManager?.sendMidiMessage(
-                                        bleManager.channel,
-                                        string2Midi(text),
-                                        velocity.intValue,
-                                        NoteON = true
-                                    )
-                                    velocity.value += 6
-                                    delay(50)
-                                }
-                            }
+//                            currentJob.value = coroutineScope.launch {
+//                                while (isHolding && velocity.intValue < 127) {
+//                                    onHold()
+//                                    bleManager?.sendMidiMessage(
+//                                        bleManager.channel,
+//                                        string2Midi(text),
+//                                        velocity.intValue,
+//                                        NoteON = true
+//                                    )
+//                                    velocity.value += 6
+//                                    delay(50)
+//                                }
+//                            }
                         }
                         true
                     }
@@ -431,7 +465,7 @@ fun CustomSeekBarWithScroll(content: @Composable () -> Unit = {}) {
             ) {
                 Row(
                     modifier = Modifier
-                        .horizontalScroll(scrollState)
+                        .horizontalScroll(scrollState, enabled = false)
                         // Mesurer la taille totale du contenu
                         .onGloballyPositioned { coordinates ->
                             contentSize = coordinates.size
