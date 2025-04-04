@@ -1,6 +1,5 @@
 package com.example.orchestrion.Screens
 
-import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
@@ -8,26 +7,18 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.text.KeyboardActions
-import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.foundation.text.input.InputTransformation.Companion.keyboardOptions
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonColors
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.ShapeDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -38,21 +29,17 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.input.ImeAction
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.orchestrion.BleManager
-import com.example.orchestrion.Melodie
 import com.example.orchestrion.R
 import com.example.orchestrion.SpinnerConfig
 import com.example.orchestrion.ViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
-import sendAllNotesOff
 
 @Preview
 @Composable
@@ -73,7 +60,7 @@ fun ConfigScreen(
     bleManager: BleManager?
 ) {
     val context = LocalContext.current
-    val options = listOf("Sinusoidale", "Carre", "Triangulaire")
+    val options = listOf("Sinusoidale", "Triangulaire", "Enveloppe", "Carre")
     var buttonColor = ButtonColors(
         Color.Transparent, Color.Black,
         Color.Transparent, Color.Black
@@ -148,35 +135,39 @@ fun ConfigScreen(
                         var text by remember { mutableStateOf(bleManager?.channel.toString()) }
                         var oldChannel by remember { mutableStateOf(bleManager?.channel.toString()) }
 
-                        OutlinedTextField(
-                            modifier = Modifier.fillMaxWidth(0.8f),
-                            value = text,
-                            onValueChange = { newText ->
-                                // Filtrer pour ne garder que les chiffres
-                                if (newText.all { it.isDigit() }) {
-                                    text = newText
-                                }
-                            },
-                            label = { Text(text = "Channel Midi") },
-                            keyboardOptions = KeyboardOptions(
-                                keyboardType = KeyboardType.Number,
-                                imeAction = ImeAction.Done
-                            ),
-                            keyboardActions = KeyboardActions(
-                                onDone = {
-                                    val number = text.toIntOrNull()
-                                    if (number != null && number in 1..16) {
-                                        if (bleManager != null) {
-                                            bleManager.channel = number
-                                        }
-                                        oldChannel = text // Sauvegarde la valeur correcte
-                                    } else {
-                                        text = oldChannel // Restaure l'ancienne valeur valide
-                                        Toast.makeText(context, "Valeur incorrecte", Toast.LENGTH_SHORT).show()
-                                    }
-                                }
-                            )
-                        )
+//                        OutlinedTextField(
+//                            modifier = Modifier.fillMaxWidth(0.8f),
+//                            value = text,
+//                            onValueChange = { newText ->
+//                                // Filtrer pour ne garder que les chiffres
+//                                if (newText.all { it.isDigit() }) {
+//                                    text = newText
+//                                }
+//                            },
+//                            label = { Text(text = "Channel Midi") },
+//                            keyboardOptions = KeyboardOptions(
+//                                keyboardType = KeyboardType.Number,
+//                                imeAction = ImeAction.Done
+//                            ),
+//                            keyboardActions = KeyboardActions(
+//                                onDone = {
+//                                    val number = text.toIntOrNull()
+//                                    if (number != null && number in 1..16) {
+//                                        if (bleManager != null) {
+//                                            bleManager.channel = number
+//                                        }
+//                                        oldChannel = text // Sauvegarde la valeur correcte
+//                                    } else {
+//                                        text = oldChannel // Restaure l'ancienne valeur valide
+//                                        Toast.makeText(
+//                                            context,
+//                                            "Valeur incorrecte",
+//                                            Toast.LENGTH_SHORT
+//                                        ).show()
+//                                    }
+//                                }
+//                            )
+//                        )
                     }
                     Spacer(modifier = Modifier.height(16.dp))
                     SpinnerConfig(bleManager, options, "Forme du signal", Modifier)
@@ -189,7 +180,7 @@ fun ConfigScreen(
                             .fillMaxWidth()
                             .padding(vertical = 16.dp),
                         onClick = {
-                            bleManager?.let { sendAllNotesOff(it) }
+                            bleManager?.sendTabReset()
                         }
                     ) {
                         Text(

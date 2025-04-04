@@ -75,9 +75,11 @@ class GenericCharacteristicCallbacks : public BLECharacteristicCallbacks {
     private: 
         bool update_value = false;
         uint8_t signal = 0;
-        uint8_t content2 = 0;
+        uint8_t resetTabofKeys = 0;
+        uint8_t oldresetTabofKeys = 0;
         uint8_t content3 = 0;
         uint8_t content4 =0;
+
 
         void onWrite(BLECharacteristic* pCharacteristic) override {
             // Récupérer les données reçues
@@ -87,11 +89,11 @@ class GenericCharacteristicCallbacks : public BLECharacteristicCallbacks {
 
             if(data[0] == 0x00) {
             signal = data[1];   
-            content2 = data[2];  
+            resetTabofKeys = data[2];  
             content3 = data[3]; 
             content4 = data[4]; 
 
-            Serial.printf("Donnée Generic reçue : Donnée 1 = %d \t, Donnée 2 = %d \t, Donnée 3 = %d \t, Donnée 3 = %d \n", signal, content2, content3, content4);
+            Serial.printf("Donnée Generic reçue : Donnée 1 = %d \t, Donnée 2 = %d \t, Donnée 3 = %d \t, Donnée 3 = %d \n", signal, resetTabofKeys, content3, content4);
             update_value = true;
             } else {
                 Serial.println("Erreur : Taille des données incorrecte");
@@ -106,6 +108,15 @@ class GenericCharacteristicCallbacks : public BLECharacteristicCallbacks {
             return signal;
         }
 
+        bool GetResetMsg(){
+            if(resetTabofKeys != oldresetTabofKeys){
+                oldresetTabofKeys = resetTabofKeys;
+                return true;
+            }else{
+                return false;
+            }
+        }
+
         bool getUpdate(){
             return update_value;
         }
@@ -114,6 +125,43 @@ class GenericCharacteristicCallbacks : public BLECharacteristicCallbacks {
             update_value = value;
         }
 };
+
+
+/* class ResetTabCharacteristicCallbacks : public BLECharacteristicCallbacks {
+    private: 
+        bool update_value = false;
+        bool reset = false;
+
+        void onWrite(BLECharacteristic* pCharacteristic) override {
+            // Récupérer les données reçues
+            std::string value = pCharacteristic->getValue();
+            const uint8_t* data = reinterpret_cast<const uint8_t*>(value.data()); // Convertis le tableau value.data dans en un uint8_t*
+            size_t length = value.length();
+
+            update_value = true;
+            reset = true;
+            Serial.println("received msg on reset");
+            
+        }
+        void onRead(BLECharacteristic *pCharacteristic) override {//ESP 2 Android
+            Serial.println("Donnée lue !");
+        }
+    public : 
+    
+        bool GetResetMsg(){
+            return reset;
+        }
+        void SetResetMsg(bool _reset){
+            reset = _reset;
+        }
+        bool getUpdate(){
+            return update_value;
+        }
+
+        void setUpdate(bool value){
+            update_value = value;
+        }
+}; */
 
 class ColorCharacteristicCallbacks : public BLECharacteristicCallbacks {
     private: 
