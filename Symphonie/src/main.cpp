@@ -27,16 +27,15 @@ void setup() {
 
   startMozzi();
   oscil.setFreq(0);
-  // for (int i = 0; i < MAX_TILES_HELD; ++i) {
-  //   tableau[i] = new Oscil<SIN4096_NUM_CELLS, MOZZI_AUDIO_RATE>(SIN4096_DATA);
-  //   tableau[i]->setFreq(0.f);
-  // }
+
+  mainenant_debug = millis();
 
   pinMode(CONNECTION_LED, OUTPUT);
   digitalWrite(CONNECTION_LED, LOW);
 }
 
 void loop() {
+  Debug();
   if(ble_midi.IsConnected())
     digitalWrite(CONNECTION_LED, HIGH);
   else
@@ -117,10 +116,7 @@ void SetSignalForm(){
         wave_table = SQUARE_NO_ALIAS_2048_DATA; 
         break;
     }
-    
-/*     for (int i = 0; i < MAX_TILES_HELD; i++) {
-      tableau[i]->setTable(wave_table);
-    } */
+
     oscil.setTable(wave_table);
   }
 
@@ -145,13 +141,6 @@ void updateControl(){
     oscil.setFreq(0);
   }
 
-/*   if (key_pressed[0] != NO_KEY_PRESSED)
-  {
-    oscil.setFreq(frequencies[key_pressed[0]]);
-  }else{
-    oscil.setFreq(0);
-  } */
-
 }
 
 AudioOutput updateAudio() {
@@ -167,7 +156,6 @@ void resetTabOfPressedKeys(){
     key_pressed[i] = NO_KEY_PRESSED;
   }
 }
-
 
 void add2pressed_key(uint8_t key) {
   for(int i = 0; i < MAX_TILES_HELD; i++) {
@@ -236,6 +224,13 @@ void scanKeyboard(){
               Serial.println(state);
           }
       }
+  }
+}
+
+void Debug(){
+  if((millis() - mainenant_debug >= PERIODE_DEBUG) || (millis() < mainenant_debug)){//Toutes les 100ms ou si millis depasse 47 jours
+    mainenant_debug = millis();
+    Serial.printf("Key pressed1: %d,\t Key pressed2: %d,\t Key pressed3: %d,\tKey pressed4: %d,\tKey pressed5: %d \n", key_pressed[0], key_pressed[1], key_pressed[2], key_pressed[3], key_pressed[4]);
   }
 }
 

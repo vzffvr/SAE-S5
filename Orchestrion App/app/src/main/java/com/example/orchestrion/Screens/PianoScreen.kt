@@ -2,6 +2,8 @@ package com.example.orchestrion.Screens
 
 import android.content.res.Configuration
 import android.graphics.drawable.BitmapDrawable
+import android.os.Handler
+import android.os.Looper
 import android.view.MotionEvent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.horizontalScroll
@@ -57,6 +59,7 @@ import com.example.orchestrion.R
 import com.example.orchestrion.ViewModel
 import com.example.orchestrion.colorpicker.ColorViewModel
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 @Preview(device = "spec:width=1600dp,height=891dp")
@@ -203,7 +206,8 @@ fun WhiteKey(
     val coroutineScope = rememberCoroutineScope()
     var isHolding by remember { mutableStateOf(false) }
     val currentJob = remember { mutableStateOf<Job?>(null) }
-    var velocity = remember { mutableIntStateOf(0) }
+//    var velocity = remember { mutableIntStateOf(0) }
+    var startTime = 0
 
     Button(
         onClick = {}, // Désactivé car on gère les événements manuellement
@@ -230,6 +234,7 @@ fun WhiteKey(
 //                                    delay(50)
 //                                }
 //                            }
+                            startTime = System.currentTimeMillis().toInt()
                             onPress()
                         }
                         true
@@ -239,8 +244,11 @@ fun WhiteKey(
                         isHolding = false
                         currentJob.value?.cancel()
                         backgroundColor = Color.White
-                        velocity.intValue = 0
-                        onRelease()
+//                        velocity.intValue = 0
+                        val handler = Handler(Looper.getMainLooper())
+                        handler.postDelayed({
+                            onRelease()
+                        }, 100)
                         true
                     }
 
@@ -274,7 +282,7 @@ fun BlackKey(
     val coroutineScope = rememberCoroutineScope()
     var isHolding by remember { mutableStateOf(false) }
     val currentJob = remember { mutableStateOf<Job?>(null) }
-    var velocity = remember { mutableIntStateOf(0) }
+//    var velocity = remember { mutableIntStateOf(0) }
     var activePointerId: Int? by remember { mutableStateOf(null) } // Stocke l'ID du pointeur actif
 
     Button(
@@ -319,7 +327,7 @@ fun BlackKey(
                             activePointerId = null
                             currentJob.value?.cancel()
                             backgroundColor = Color.Black
-                            velocity.intValue = 0
+//                            velocity.intValue = 0
                             onRelease()
                         }
                         true

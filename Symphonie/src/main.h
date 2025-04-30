@@ -16,6 +16,9 @@
 #define MAX_FREQUENCIE 10000
 #define MAX_TILES_HELD 5
 
+#define PERIODE_DEBUG 1000
+uint32_t mainenant_debug = 0;
+
 #define CONNECTION_LED 21
 
 byte rowPins[ROWS] = {16, 17, 18, 4, 19}; // 17 // Lignes
@@ -50,3 +53,5 @@ void remove_from_pressed_key(uint8_t key);
 void scanKeyboard();
 void SetSignalForm();
 void resetTabOfPressedKeys();
+
+void Debug();
